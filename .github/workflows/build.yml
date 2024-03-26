@@ -1,0 +1,20 @@
+name: Build
+ 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request: 
+
+jobs: 
+  Mulesoft:
+    uses: btfacrm/common-devops/.github/workflows/mule-build.yml@main
+    with:
+      keyvault-key: jpworks-keyvault
+    secrets:
+      azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    # Needed by the Unit Test Action
+    permissions:
+      contents: write
+      issues: write
+      checks: write
