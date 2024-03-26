@@ -1,0 +1,12 @@
+# Environment where the service is running
+env: local
+
+schemataxpayer: "taxpayer.ffd"
+  
+ftp:
+  host: myhost
+  username: myuser
+  password: mypassword
+  directoryinput: in
+  directoryoutput: out
+
