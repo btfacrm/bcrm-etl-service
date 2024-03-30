@@ -14,7 +14,7 @@
 		http://www.mulesoft.org/schema/mule/http
 		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 		
-	<flow name="api" >
+	<flow name="api">
 		<http:listener doc:name="Listener" config-ref="api-httpListenerConfig" path="/etl" />
 
 		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
@@ -26,6 +26,9 @@
 	<flow name="etl-process">
 
 		<logger level="INFO" doc:name="log" message="#['ETL process started']"/>
+
+		<flow-ref  name="view-contact"/>
+
 		<set-variable doc:name="service time" variableName="serviceProcessingTime" value="#[(now() as Number {unit: 'milliseconds'}) - vars.start]"  />
 		<set-variable doc:name="message" variableName="message" value="#['ETL proccess started']"  />
 		<set-variable doc:name="httpStatus" variableName="httpStatus" value="#['200']"  />

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+ 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:opentelemetry="http://www.mulesoft.org/schema/mule/opentelemetry"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/db 
+		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd		
+		http://www.mulesoft.org/schema/mule/opentelemetry 
+		http://www.mulesoft.org/schema/mule/opentelemetry/current/mule-opentelemetry.xsd">
+	
+	<flow name="view-contact">
+
+		<logger level="INFO" category="app" message="#['Contact View']" />
+
+        <set-variable doc:name="set validFrom" variableName="validFrom" value="2024-02-01" />
+        <set-variable doc:name="set maxRecords" variableName="maxRecords" value="2000" />
+
+		<ee:transform doc:name="build query" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ 
+				%dw 2.0
+				output application/json
+				---
+
+				"SELECT top " ++ vars.maxRecords as String ++
+				"  Id, FirstName, LastName, Email " ++
+				" FROM contact  " ++
+                " where validFrom > :validFrom "
+			]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+        <ee:transform doc:name="test" >
+			<ee:variables >
+				<ee:set-variable variableName="test"><![CDATA[#[ 
+				%dw 2.0
+				output application/json
+				---
+
+				"select @@servername " 
+			]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+        <logger doc:name="sql query" level="INFO" category="app"
+            message="#[output application/java --- vars.query]"/>
+
+		<db:select doc:name="Select" config-ref="Database_Config">
+            <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ 
+				validFrom: vars.validFrom,
+				maxRecords: vars.maxRecords }]]]>
+			</db:input-parameters>
+		</db:select>
+
+		<logger doc:name="result" level="INFO" category="app"
+			message="#[output application/json --- if ( payload != null) payload else 'No records found']"/>
+
+		<logger doc:name="total records" level="INFO" category="app" 
+			message="#[${file::script-records-found.dwl}]"/>
+
+        <error-handler ref="global-error-handler" />
+	</flow>
+</mule>
