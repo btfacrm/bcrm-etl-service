@@ -15,7 +15,7 @@
 		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 		
 	<flow name="api" >
-		<http:listener doc:name="Listener" config-ref="HTTP_Listener_config" path="/etl" />
+		<http:listener doc:name="Listener" config-ref="api-httpListenerConfig" path="/etl" />
 
 		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
 		<logger level="INFO" doc:name="log" message='#["Http call"]' />
