@@ -1,12 +1,16 @@
 # Environment where the service is running
 env: local
-
-schemataxpayer: "taxpayer.ffd"
   
-ftp:
-  host: myhost
-  username: myuser
-  password: mypassword
-  directoryinput: in
-  directoryoutput: out
-
+service:
+  protocol: "HTTPS"
+  port: "443"
+  path:
+    contact: "/api/contact"
+    phone: "/api/phone"
+    address: "/api/address"
+    email: "/api/email"
+    tribalenrollment: "/api/tribalenrollment"
+    account: "/api/account"
+    balance: "/api/balance"
+    agencyregion: "/api/agencyregion"
+    disbursement: "/api/disbursement"

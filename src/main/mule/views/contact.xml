@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+ 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:opentelemetry="http://www.mulesoft.org/schema/mule/opentelemetry"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<flow name="view-contact">
+
+		<logger level="INFO" category="app" message="#['Contact View']" />
+
+		<!-- Read Watermark -->
+        <set-variable doc:name="set view" variableName="view" value="contact" />
+		<flow-ref name="read-watermark"/>
+        <set-variable doc:name="set validFrom" variableName="validFrom" value="#[payload[0].LastExecution as String]" />
+		<logger level="INFO" category="app" message="#['validFrom: ' ++ vars.validFrom]" />
+
+        <set-variable doc:name="set maxRecords" variableName="maxRecords" value="2000" />
+
+		<!-- RAML datetime format RFC3339 is just a profile of ISO 8601 in Sql Server-->
+		<ee:transform doc:name="query contact" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+					output application/json
+					---
+					"SELECT top " ++ vars.maxRecords as String ++
+					"  Id, ContactID, FirstName, LastName, Email, FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS validFrom " ++
+					" FROM contact  " ++
+					" where validFrom > :validFrom "
+				]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+		<flow-ref name="mssql-query"/>
+
+        <ee:transform doc:name="api payload" >
+            <ee:message >
+                <ee:set-payload ><![CDATA[%dw 2.0
+                    output application/json
+                    ---
+					payload map (item, value) ->{
+						contactId: 		item.ContactID as String,
+						firstName: 		item.FirstName,
+						lastName: 		item.LastName,
+						middleInitial: 	"Clement",
+						name: 			"Han Clement Solo",
+						gender: 		"M",
+						ssn: 			"123456789",
+						ssnFlag: 		true,
+						dob: 			"1978-12-02",
+						dod: 			"2024-12-02",
+						activeFlag: 	true,
+						disbursementFlag: true,
+						date: 			item.validFrom
+					}
+                    ]]>
+                </ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+		<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+		<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
+
+		<flow-ref name="send-api"/>
+
+        <error-handler ref="global-error-handler" />
+	</flow>
+</mule>

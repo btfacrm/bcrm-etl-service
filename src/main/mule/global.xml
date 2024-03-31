@@ -34,5 +34,12 @@
 			tlsContext="TLS_Context">
 		</http:listener-connection>
 	</http:listener-config>
+	
+	<http:request-config name="HTTP_Request_Configuration">
+		<http:request-connection 
+			protocol="${service.protocol}" 
+			host="${service.host}" 
+			port="${service.port}" />
+	</http:request-config>
 		
 </mule>
