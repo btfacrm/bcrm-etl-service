@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>176302a0-a94d-44e9-a517-9e6dc9548d0d</groupId>
 		<artifactId>common-pom</artifactId>
-		<version>1.0.17</version>
+		<version>1.0.17</version> 
 		<relativePath/>
 	</parent>
 	<groupId>176302a0-a94d-44e9-a517-9e6dc9548d0d</groupId>
