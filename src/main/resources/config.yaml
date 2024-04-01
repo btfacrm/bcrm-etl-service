@@ -1,6 +1,9 @@
 # Environment where the service is running
 env: local
-  
+
+# Maximum number of records read from SSOT
+maxrecords: 2000
+
 service:
   protocol: "HTTPS"
   port: "443"

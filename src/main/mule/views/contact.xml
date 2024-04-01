@@ -24,7 +24,7 @@
         <set-variable doc:name="set validFrom" variableName="validFrom" value="#[payload[0].LastExecution as String]" />
 		<logger level="INFO" category="app" message="#['validFrom: ' ++ vars.validFrom]" />
 
-        <set-variable doc:name="set maxRecords" variableName="maxRecords" value="2000" />
+        <set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
 
 		<!-- RAML datetime format RFC3339 is just a profile of ISO 8601 in Sql Server-->
 		<ee:transform doc:name="query contact" >
@@ -33,7 +33,8 @@
 					output application/json
 					---
 					"SELECT top " ++ vars.maxRecords as String ++
-					"  Id, ContactID, FirstName, LastName, Email, FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS validFrom " ++
+					"  Id, ContactID, FirstName, LastName, Email, 
+					"  FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS validFrom " ++
 					" FROM contact  " ++
 					" where validFrom > :validFrom "
 				]]]>
