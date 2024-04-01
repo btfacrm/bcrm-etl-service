@@ -32,11 +32,11 @@
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 					output application/json
 					---
-					"SELECT top " ++ vars.maxRecords as String ++
-					"  Id, ContactID, FirstName, LastName, Email, 
-					"  FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS validFrom " ++
+					" SELECT top " ++ vars.maxRecords as String ++
+					"   Id, ContactID, FirstName, LastName, Email, " ++
+					"   FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS validFrom " ++
 					" FROM contact  " ++
-					" where validFrom > :validFrom "
+					" WHERE validFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
