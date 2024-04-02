@@ -27,8 +27,18 @@ The next properties must be provided to run the service:
 
 | Property                     | Description               |
 | ---------------------------- | ------------------------- |
-| sqlserver.host               | Keystore with the cetificate to connect with Salesforce. |
+| mssql.host                   | Microsoft Sql Server Host |
+| mssql.port                   | Microsoft Sql Server Port |
+| mssql.user                   | Microsoft Sql Server User |
+| mssql.password               | Microsoft Sql Server Password |
+| mssql.database               | Microsoft Sql Server Database Name |
 | api.id                       | API Manager instance id |
+| jks.path                     | Path to the keystore for https |
+| jks.keypassword              | Password to open the keystore for https |
+| jks.alias                    | Name of the certificate in the keystore for https |
+| service.host                 | BCRM Salesforce System API host |
+| service.clientid             | BCRM Salesforce System API client-id |
+| service.clientsecret         | BCRM Salesforce System API client-secret |
 | logapplication               | Logging level for application messages |
 | logconnectors                | Logging level for connectors |
 | logroot                      | Logging level for root |

@@ -16,27 +16,27 @@
 	
 	<flow name="view-contact">
 
-		<logger level="INFO" category="app" message="#['Contact View']" />
+		<logger level="INFO" category="app" message="#['Process Contact View']" />
 
 		<!-- Read Watermark -->
         <set-variable doc:name="set view" variableName="view" value="contact" />
-		<flow-ref name="read-watermark"/>
-        <set-variable doc:name="set validFrom" variableName="validFrom" value="#[payload[0].LastExecution as String]" />
-		<logger level="INFO" category="app" message="#['validFrom: ' ++ vars.validFrom]" />
+		<flow-ref name="watermark-read"/>
 
+		<!-- Create query for Database View -->
         <set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
-
-		<!-- RAML datetime format RFC3339 is just a profile of ISO 8601 in Sql Server-->
 		<ee:transform doc:name="query contact" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 					output application/json
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   Id, ContactID, FirstName, LastName, Email, " ++
-					"   FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS validFrom " ++
-					" FROM contact  " ++
-					" WHERE validFrom > :validFrom "
+					"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
+					"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
+					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
+					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
+					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					" FROM Contact  " ++
+					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
@@ -44,35 +44,41 @@
 
 		<flow-ref name="mssql-query"/>
 
-        <ee:transform doc:name="api payload" >
-            <ee:message >
-                <ee:set-payload ><![CDATA[%dw 2.0
-                    output application/json
-                    ---
-					payload map (item, value) ->{
-						contactId: 		item.ContactID as String,
-						firstName: 		item.FirstName,
-						lastName: 		item.LastName,
-						middleInitial: 	"Clement",
-						name: 			"Han Clement Solo",
-						gender: 		"M",
-						ssn: 			"123456789",
-						ssnFlag: 		true,
-						dob: 			"1978-12-02",
-						dod: 			"2024-12-02",
-						activeFlag: 	true,
-						disbursementFlag: true,
-						date: 			item.validFrom
-					}
-                    ]]>
-                </ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<choice doc:name="records to process?" >
+            <when expression='#[ vars.recordsProcessed > 0 ]'>
+				<ee:transform doc:name="api payload" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json
+							---
+							payload map (item, value) ->{
+								contactId: 		item.ContactID as String,
+								firstName: 		item.PrimaryFirstName,
+								lastName: 		item.PrimaryLastName,
+								middleInitial: 	item.PrimaryMiddleInitial,
+								name: 			item.ContactName,
+								gender: 		item.PrimaryGender,
+								ssn: 			item.SSN,
+								ssnFlag: 		if (item.SSNFlag != 0) true else false,
+								dob: 			item.DateOfBirth,
+								dod: 			item.DateOfDeath,
+								activeFlag: 	if (item.ActiveFlag != 0) true else false,
+								disbursementFlag: if (item.DisbursementElegibilityFlag != 0) true else false,
+								date: 			item.ValidFrom
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
 
-		<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
-		<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
-
-		<flow-ref name="send-api"/>
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
+				<flow-ref name="send-api"/>
+            </when>
+			<otherwise>
+				<flow-ref name="watermark-update-norecords"/>
+			</otherwise>
+        </choice>     
 
         <error-handler ref="global-error-handler" />
 	</flow>
