@@ -68,10 +68,14 @@
         <flow-ref name="response"/>
     </sub-flow>
 
+
+
+
 	<!-- ********************************************* --> 
-	<!-- Sql Server read/write                         -->
+	<!-- Sql Server operations                         -->
 	<!-- ********************************************* --> 
-    <sub-flow name="mssql-query">
+
+	<sub-flow name="mssql-query">
 
         <logger doc:name="sql query" level="INFO" category="app"
             message="#[output application/java --- vars.query]"/>
@@ -110,6 +114,13 @@
             message="#[${file::script-records-found.dwl}]"/>
 	</sub-flow>
 
+
+
+
+	<!-- ********************************************* --> 
+	<!-- HTTP request utilities                        -->
+	<!-- ********************************************* --> 
+
 	<flow name="http-post">
 		<logger doc:name="call post method" level="INFO" category="app" 
 			message='#[ "Call POST method, path: " ++ vars.servicePath ++ ", statusValidator: " ++ (vars.statusValidator as String) ]' />
@@ -142,7 +153,11 @@
 		</error-handler>
 	</flow>
 
-    <sub-flow name="send-api">
+	<!-- ********************************************* --> 
+	<!-- Common flows                                  -->
+	<!-- ********************************************* --> 
+    
+	<sub-flow name="send-api">
         <flow-ref name="http-post"/>
 
         <choice doc:name="verify http call" >
