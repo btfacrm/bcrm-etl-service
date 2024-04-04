@@ -1,4 +1,4 @@
-name: Build
+name: Build v2
  
 on:
   push:
@@ -7,11 +7,9 @@ on:
 
 jobs: 
   Mulesoft:
-    uses: btfacrm/common-devops/.github/workflows/mule-build.yml@main
-    with:
-      keyvault-key: jpworks-keyvault
+    uses: btfacrm/common-devops/.github/workflows/mule-secretsmgm.yml@main
     secrets:
-      azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+      azure-credentials: inherit
     
     # Needed by the Unit Test Action
     permissions:
