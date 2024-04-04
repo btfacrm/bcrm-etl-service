@@ -8,8 +8,7 @@ on:
 jobs: 
   Mulesoft:
     uses: btfacrm/common-devops/.github/workflows/mule-secretsmgm.yml@main
-    secrets:
-      azure-credentials: inherit
+    secrets: inherit
     
     # Needed by the Unit Test Action
     permissions:
