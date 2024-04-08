@@ -7,6 +7,7 @@ on:
 jobs: 
   Deployment:
     uses: btfacrm/common-devops/.github/workflows/mule-deployment.yml@main
+    secrets: inherit
     if: |
       contains(toJson(github.event.issue.labels), 'forward')
 
