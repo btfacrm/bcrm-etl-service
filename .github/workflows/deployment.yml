@@ -8,12 +8,7 @@ jobs:
   Deployment:
     uses: btfacrm/common-devops/.github/workflows/mule-deployment.yml@main
     if: |
-      contains(toJson(github.event.issue.labels), 'dev') ||
-      contains(toJson(github.event.issue.labels), 'prd')
-    with:
-      keyvault-key: jpworks-keyvault
-    secrets:
-      azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+      contains(toJson(github.event.issue.labels), 'forward')
 
     # Needed by the Unit Test Action
     permissions:
