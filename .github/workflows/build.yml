@@ -8,10 +8,6 @@ on:
 jobs: 
   Mulesoft:
     uses: btfacrm/common-devops/.github/workflows/mule-build.yml@main
-    with:
-      keyvault-key: jpworks-keyvault
-    secrets:
-      azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
     
     # Needed by the Unit Test Action
     permissions:
