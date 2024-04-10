@@ -8,8 +8,8 @@ jobs:
   Deployment:
     uses: btfacrm/common-devops/.github/workflows/mule-deployment.yml@main
     secrets: inherit
-    if: |
-      contains(toJson(github.event.issue.title), 'Deployment')
+    #if: |
+    #  contains(toJson(github.event.issue.title), 'Deployment')
 
     # Needed by the Unit Test Action
     permissions:
