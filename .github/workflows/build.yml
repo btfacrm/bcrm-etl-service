@@ -11,7 +11,7 @@ jobs:
     secrets: inherit
 
     # Needed by the Unit Test Action
-    permissions:
-      contents: write
-      issues: write
-      checks: write
+    #permissions:
+    #  contents: write
+    #  issues: write
+    #  checks: write
