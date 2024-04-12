@@ -1,0 +1,11 @@
+name: Debug
+ 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request: 
+
+jobs: 
+  buildtest:
+    uses: btfacrm/common-devops/.github/workflows/mule-debug.yml@main
+    secrets: inherit
