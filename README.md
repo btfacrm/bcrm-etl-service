@@ -7,7 +7,6 @@
   ![Release](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-re.svg)
   ![dev version](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-dev.svg)
   ![prd version](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-prd.svg)
-  ![test badge](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-build.svg)
 <br>
 
 SSOT ETL service for Salesforce Integration
