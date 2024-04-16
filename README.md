@@ -1,12 +1,12 @@
 # BCRM ETL service SSOT
 ![Powered by](https://img.shields.io/badge/Powered%20by-Mulesoft-535597.svg)
-  ![Unit test](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-salesforce-sapi-fips-ut.svg)
-  ![Code coverage](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-cc.svg)
+  ![Unit test](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-salesforce-sapi-fips-ut.svg)
+  ![Code coverage](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-cc.svg)
   ![Build](https://github.com/btfacrm/bcrm-etl-service/actions/workflows/build.yml/badge.svg)
-  ![Build job](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-wf.svg)
-  ![Release](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-re.svg)
-  ![dev version](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-dev.svg)
-  ![prd version](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-prd.svg)
+  ![Build job](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-wf.svg)
+  ![Release](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-re.svg)
+  ![dev version](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-dev.svg)
+  ![prd version](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-prd.svg)
   ![test badge](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-build.svg)
 <br>
 
