@@ -7,6 +7,7 @@
   ![Release](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-re.svg)
   ![dev version](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-dev.svg)
   ![prd version](https://gist.githubusercontent.com/jpontdia/2f22ca2ddf1ba473d6e2cff61cc2fba9/raw/bcrm-etl-service-prd.svg)
+  ![test badge](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-build.svg)
 <br>
 
 SSOT ETL service for Salesforce Integration
