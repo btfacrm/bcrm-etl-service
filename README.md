@@ -1,12 +1,14 @@
 # BCRM ETL service SSOT
 ![Powered by](https://img.shields.io/badge/Powered%20by-Mulesoft-535597.svg)
-  ![Unit test](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-salesforce-sapi-fips-ut.svg)
+  ![Unit test](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-ut.svg)
   ![Code coverage](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-cc.svg)
   ![Build](https://github.com/btfacrm/bcrm-etl-service/actions/workflows/build.yml/badge.svg)
   ![Build job](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-wf.svg)
   ![Release](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-re.svg)
   ![dev version](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-dev.svg)
+  ![dev bat test](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-dev-test.svg)
   ![prd version](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-prd.svg)
+  ![prd bat test](https://raw.githubusercontent.com/btfacrm/badges/main/bcrm-etl-service/bcrm-etl-service-prd-test.svg)
 <br>
 
 SSOT ETL service for Salesforce Integration
