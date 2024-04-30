@@ -16,10 +16,10 @@
 	
 	<flow name="view-contact">
 
-		<logger level="INFO" category="app" message="#['Process Contact View']" />
+		<logger level="INFO" category="app" message="#['Process Account Master UDF View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="contact" />
+        <set-variable doc:name="set view" variableName="view" value="accountmasterudf" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -27,15 +27,15 @@
 		<ee:transform doc:name="query contact" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
-					output application/json skipNullOn="everywhere"
+					output application/json
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
-					"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
-					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
-					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
+					"   CustomerAccountNumber, BirthCert_OnFile, Age_Of_Majority, " ++
+					"   Long_Name_Line_5, Pending_SocialServices_Assessment, Managed_Agency_Code, Managed_Agency_Name, Non_Responsive_Guardian, " ++
+					"   FORMAT(DistPlan_ExpireDate, 'yyyy-MM-dd') AS DistPlan_ExpireDate, " ++
+					"   FORMAT(Temporary_CourtOrder_ExpireDate, 'yyyy-MM-dd') AS Temporary_CourtOrder_ExpireDate, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM Contact  " ++
+					" FROM accountmasterudf  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
@@ -49,29 +49,27 @@
 				<ee:transform doc:name="api payload" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
-							output application/json
+							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								contactId: 		item.ContactID as String,
-								firstName: 		item.PrimaryFirstName,
-								lastName: 		item.PrimaryLastName,
-								middleInitial: 	item.PrimaryMiddleInitial,
-								name: 			item.ContactName,
-								gender: 		item.PrimaryGender,
-								ssn: 			item.SSN,
-								ssnFlag: 		if (item.SSNFlag != 0) true else false,
-								dob: 			item.DateOfBirth,
-								dod: 			item.DateOfDeath,
-								activeFlag: 	if (item.ActiveFlag != 0) true else false,
-								disbursementFlag: if (item.DisbursementElegibilityFlag != 0) true else false,
-								date: 			item.ValidFrom
+								account: 				item.CustomerAccountNumber as String,
+								distributionExpiration: item.DistPlan_ExpireDate,
+								temporaryCourtOrderExp: item.Temporary_CourtOrder_ExpireDate,
+								birthCertificate: 		item.BirthCert_OnFile,
+								ageMajority: 			item.Age_Of_Majority,
+								line5: 					item.Long_Name_Line_5,
+								pendingSocServ: 		item.Pending_SocialServices_Assessment,
+								managedAgencyCode: 		item.Managed_Agency_Code,
+								managedAgencyName: 		item.Managed_Agency_Name,
+								nonResponsiveGuardian: 	item.Non_Responsive_Guardian,
+								date: 					item.ValidFrom
 							}
 							]]>
 						</ee:set-payload>
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.accountmasterudf}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>

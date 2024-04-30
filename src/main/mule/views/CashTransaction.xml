@@ -16,10 +16,10 @@
 	
 	<flow name="view-contact">
 
-		<logger level="INFO" category="app" message="#['Process Contact View']" />
+		<logger level="INFO" category="app" message="#['Process Cash Transaction View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="contact" />
+        <set-variable doc:name="set view" variableName="view" value="cashtransaction" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -30,13 +30,12 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
-					"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
-					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
-					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
-					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM Contact  " ++
-					" WHERE ValidFrom > :validFrom "
+					"   CustomerAccountNumber, TransactionNumber, TransactionCode, DisbursementText, DebitCreditIndicator, " ++
+					"   Amount, Status, SettledFlag, PrincIncomeIndicator, TaxCode, TaxYear," ++
+					"   FORMAT(SettleDate, 'yyyy-MM-dd') AS SettleDate, " ++
+					"   FORMAT(LastModifiedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS LastModifiedDate " ++
+					" FROM cashtransaction  " ++
+					" WHERE LastModifiedDate > :LastModifiedDate "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
@@ -52,26 +51,26 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								contactId: 		item.ContactID as String,
-								firstName: 		item.PrimaryFirstName,
-								lastName: 		item.PrimaryLastName,
-								middleInitial: 	item.PrimaryMiddleInitial,
-								name: 			item.ContactName,
-								gender: 		item.PrimaryGender,
-								ssn: 			item.SSN,
-								ssnFlag: 		if (item.SSNFlag != 0) true else false,
-								dob: 			item.DateOfBirth,
-								dod: 			item.DateOfDeath,
-								activeFlag: 	if (item.ActiveFlag != 0) true else false,
-								disbursementFlag: if (item.DisbursementElegibilityFlag != 0) true else false,
-								date: 			item.ValidFrom
+								account: 				item.CustomerAccountNumber as String,
+								transaction: 			item.TransactionNumber,
+								code: 					item.TransactionCode,
+								disbursementText: 		item.DisbursementText,
+								debitCreditIndicator: 	item.DebitCreditIndicator,
+								amount: 				item.Amount,
+								settleDate: 			item.SettleDate,
+								status: 				item.Status,
+								settleFlag: 			item.SettledFlag,
+								incomeIndicator: 		item.PrincIncomeIndicator,
+								taxCode: 				item.TaxCode,
+								taxYear: 				item.TaxYear,
+								date: 					item.LastModifiedDate
 							}
 							]]>
 						</ee:set-payload>
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.cashtransaction}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>

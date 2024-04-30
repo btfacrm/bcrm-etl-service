@@ -16,10 +16,10 @@
 	
 	<flow name="view-contact">
 
-		<logger level="INFO" category="app" message="#['Process Contact View']" />
+		<logger level="INFO" category="app" message="#['Process Address View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="contact" />
+        <set-variable doc:name="set view" variableName="view" value="address" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -30,12 +30,10 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
-					"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
-					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
-					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
+					"   INNO_ID, ContactID, AddressType, eMail, Address1, Address2, Address3, " ++
+					"   City, State, ZipCode, CountryCode, primaryaddressflag, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM Contact  " ++
+					" FROM address  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
@@ -52,18 +50,18 @@
 							output application/json
 							---
 							payload map (item, value) ->{
+								addressId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
-								firstName: 		item.PrimaryFirstName,
-								lastName: 		item.PrimaryLastName,
-								middleInitial: 	item.PrimaryMiddleInitial,
-								name: 			item.ContactName,
-								gender: 		item.PrimaryGender,
-								ssn: 			item.SSN,
-								ssnFlag: 		if (item.SSNFlag != 0) true else false,
-								dob: 			item.DateOfBirth,
-								dod: 			item.DateOfDeath,
-								activeFlag: 	if (item.ActiveFlag != 0) true else false,
-								disbursementFlag: if (item.DisbursementElegibilityFlag != 0) true else false,
+								type: 			item.AddressType,
+								email: 			item.eMail,
+								address1: 		item.Address1,
+								address2: 		item.Address2,
+								address3: 		item.Address3,
+								city: 			item.City,
+								state: 			item.State,
+								zipCode: 		item.ZipCode,
+								CountryCode: 	item.CountryCode,
+								primary: 		item.primaryaddressflag,
 								date: 			item.ValidFrom
 							}
 							]]>
@@ -71,7 +69,7 @@
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.address}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>

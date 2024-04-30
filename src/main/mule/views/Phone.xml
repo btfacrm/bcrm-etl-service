@@ -16,10 +16,10 @@
 	
 	<flow name="view-contact">
 
-		<logger level="INFO" category="app" message="#['Process Contact View']" />
+		<logger level="INFO" category="app" message="#['Process Phone View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="contact" />
+        <set-variable doc:name="set view" variableName="view" value="phone" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -30,12 +30,9 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
-					"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
-					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
-					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
+					"   INNO_ID, ContactID, PhoneTypeCode, PhoneNumber, PrimaryPhoneNumberFlag, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM Contact  " ++
+					" FROM phone  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
@@ -52,18 +49,11 @@
 							output application/json
 							---
 							payload map (item, value) ->{
+								phoneId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
-								firstName: 		item.PrimaryFirstName,
-								lastName: 		item.PrimaryLastName,
-								middleInitial: 	item.PrimaryMiddleInitial,
-								name: 			item.ContactName,
-								gender: 		item.PrimaryGender,
-								ssn: 			item.SSN,
-								ssnFlag: 		if (item.SSNFlag != 0) true else false,
-								dob: 			item.DateOfBirth,
-								dod: 			item.DateOfDeath,
-								activeFlag: 	if (item.ActiveFlag != 0) true else false,
-								disbursementFlag: if (item.DisbursementElegibilityFlag != 0) true else false,
+								type: 			item.PhoneTypeCode,
+								number: 		item.PhoneNumber,
+								primary: 		item.PrimaryPhoneNumberFlag,
 								date: 			item.ValidFrom
 							}
 							]]>
@@ -71,7 +61,7 @@
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.phone}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>

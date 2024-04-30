@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+ 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:opentelemetry="http://www.mulesoft.org/schema/mule/opentelemetry"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<flow name="view-contact">
+
+		<logger level="INFO" category="app" message="#['Process Account View']" />
+
+		<!-- Read Watermark -->
+        <set-variable doc:name="set view" variableName="view" value="account" />
+		<flow-ref name="watermark-read"/>
+
+		<!-- Create query for Database View -->
+        <set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
+		<ee:transform doc:name="query contact" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+					output application/json
+					---
+					" SELECT top " ++ vars.maxRecords as String ++
+					"   CustomerAccountNumber, OwnerContactID, AccountTierLevelCode, AccountTierLevelDesc, FreezeCode, FreezeDesc, " ++
+					"   AccountTypeCode, AccountTypeDescription, AccountCategoryCode, AccountCategoryDescription, AdminOfficerContactID, " ++
+					"   AdministratorName, ActiveFlag, ClosedFlag, CustomerDescriptionLine1, CustomerDescriptionLine2, CustomerDescriptionLine3, CustomerDescriptionLine4, StatementVsValidFrom_difference, " ++
+					"   FORMAT(DateOpened, 'yyyy-MM-dd') AS DateOpened, " ++
+					"   FORMAT(ClosedDate, 'yyyy-MM-dd') AS ClosedDate, " ++
+					"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime " ++
+					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					" FROM account  " ++
+					" WHERE ValidFrom > :validFrom "
+				]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+		<flow-ref name="mssql-query"/>
+
+		<choice doc:name="records to process?" >
+            <when expression='#[ vars.recordsProcessed > 0 ]'>
+				<ee:transform doc:name="api payload" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json skipNullOn="everywhere"
+							---
+							payload map (item, value) ->{
+								account: 				item.CustomerAccountNumber as String,
+								contactId: 				item.OwnerContactID,
+								tierLevelCode: 			item.AccountTierLevelCode,
+								tribeDescription: 		item.AccountTierLevelDesc,
+								freezeCode: 			item.FreezeCode,
+								freezeDescription: 		item.FreezeDesc,
+								typeCode: 				item.AccountTypeCode,
+								typeDescription: 		item.AccountTypeDescription,
+								categoryCode: 			item.AccountCategoryCode,
+								categoryDescription: 	item.AccountCategoryDescription,
+								adminOfficerId: 		item.AdminOfficerContactID,
+								adminOfficerName: 		item.AdministratorName,
+								activeFlag: 			item.ActiveFlag,
+								openedDate: 			item.DateOpened,
+								closedDate: 			item.ClosedDate,
+								closedFlag: 			item.ClosedFlag,
+								line1: 					item.CustomerDescriptionLine1,
+								line2: 					item.CustomerDescriptionLine2,
+								line3: 					item.CustomerDescriptionLine3,
+								line4: 					item.CustomerDescriptionLine4,
+								date: 					item.ValidFrom,
+								statementDate: 			item.StatementDateTime,
+								---: 					item.StatementVsValidFrom_difference
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
+
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.account}" />
+				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
+				<flow-ref name="send-api"/>
+            </when>
+			<otherwise>
+				<flow-ref name="watermark-update-norecords"/>
+			</otherwise>
+        </choice>     
+
+        <error-handler ref="global-error-handler" />
+	</flow>
+</mule>
