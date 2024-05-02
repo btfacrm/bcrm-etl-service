@@ -14,7 +14,7 @@
 		http://www.mulesoft.org/schema/mule/core 
 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 	
-	<flow name="view-contact">
+	<flow name="view-transaction">
 
 		<logger level="INFO" category="app" message="#['Process Cash Transaction View']" />
 
