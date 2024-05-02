@@ -16,3 +16,4 @@ jobs:
       contents: write
       issues: write
       checks: write
+      pull-requests: write

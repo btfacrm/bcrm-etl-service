@@ -1,5 +1,6 @@
 name: Build
- 
+
+# Events that trigger workflows - https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
 on:
   push:
     branches: [ "main" ]
@@ -9,9 +10,3 @@ jobs:
   Mulesoft:
     uses: btfacrm/common-devops/.github/workflows/mule-build.yml@main
     secrets: inherit
-
-    # Needed by the Unit Test Action
-    permissions:
-      contents: write
-      issues: write
-      checks: write
