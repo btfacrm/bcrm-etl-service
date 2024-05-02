@@ -49,12 +49,12 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								phoneId: 		item.INNO_ID as String,
-								contactId: 		item.ContactID as String,
-								type: 			item.PhoneTypeCode,
-								number: 		item.PhoneNumber,
-								primary: 		item.PrimaryPhoneNumberFlag,
-								date: 			item.ValidFrom
+								phoneId:	item.INNO_ID as String,
+								contactId:	item.ContactID as String,
+								'type':		item.PhoneTypeCode,
+								number:		item.PhoneNumber,
+								primary:	item.PrimaryPhoneNumberFlag,
+								date:		item.ValidFrom
 							}
 							]]>
 						</ee:set-payload>

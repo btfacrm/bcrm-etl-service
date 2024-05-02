@@ -64,7 +64,7 @@
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.agencyreagiontribe]}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.agencyregion}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>

@@ -70,7 +70,7 @@
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.cashtransaction}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.disbursement}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>
