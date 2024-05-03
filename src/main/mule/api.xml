@@ -13,19 +13,53 @@
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 		http://www.mulesoft.org/schema/mule/http
 		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-		
-	<flow name="api">
-		<http:listener doc:name="Listener" config-ref="api-httpListenerConfig" path="/etl" />
 
-		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
-
-		<flow-ref name="etl-process"/>
+	<flow name="account">
+		<http:listener config-ref="api-httpListenerConfig" path="/account" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-account"/>
 	</flow>
 	
-	<flow name="etl-process">
+	<flow name="accountudf">
+		<http:listener config-ref="api-httpListenerConfig" path="/accountudf" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-accountudf"/>
+	</flow>
 
-		<logger level="INFO" doc:name="log" message="#['ETL process started']"/>
+	<flow name="address">
+		<http:listener config-ref="api-httpListenerConfig" path="/address" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-address"/>
+	</flow>
 
+	<flow name="agencyregion">
+		<http:listener config-ref="api-httpListenerConfig" path="/agencyregion" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-agencyregion"/>
+	</flow>
+
+	<flow name="balance">
+		<http:listener config-ref="api-httpListenerConfig" path="/balance" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-balance"/>
+	</flow>
+
+	<flow name="contact">
+		<http:listener config-ref="api-httpListenerConfig" path="/contact" />
+		<flow-ref  name="initialize"/>
 		<flow-ref  name="view-contact"/>
 	</flow>
+
+	<flow name="disbursement">
+		<http:listener config-ref="api-httpListenerConfig" path="/disbursement" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-disbursement"/>
+	</flow>
+
+	<flow name="phone">
+		<http:listener config-ref="api-httpListenerConfig" path="/phone" />
+		<flow-ref  name="initialize"/>
+		<flow-ref  name="view-phone"/>
+	</flow>
+
 </mule>

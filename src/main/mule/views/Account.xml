@@ -30,14 +30,14 @@
 					output application/json
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   CustomerAccountNumber, OwnerContactID, AccountTierLevelCode, AccountTierLevelDesc, FreezeCode, FreezeDesc, " ++
+					"   CustomerAccountNumber, OwnerContactID, AccountTierLevelNum, AccountTierLevelDesc, FreezeCode, FreezeDesc, " ++
 					"   AccountTypeCode, AccountTypeDescription, AccountCategoryCode, AccountCategoryDescription, AdminOfficerContactID, " ++
 					"   AdministratorName, ActiveFlag, ClosedFlag, CustomerDescriptionLine1, CustomerDescriptionLine2, CustomerDescriptionLine3, CustomerDescriptionLine4, StatementVsValidFrom_difference, " ++
-					"   FORMAT(DateOpened, 'yyyy-MM-dd') AS DateOpened, " ++
-					"   FORMAT(ClosedDate, 'yyyy-MM-dd') AS ClosedDate, " ++
-					"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime " ++
+					"   FORMAT(DateOpened, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS DateOpened, " ++
+					"   FORMAT(ClosedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ClosedDate, " ++
+					"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM account  " ++
+					" FROM VWCrm_AccountMaster " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
@@ -54,22 +54,22 @@
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								account: 				item.CustomerAccountNumber as String,
-								contactId: 				item.OwnerContactID,
+								account: 				item.CustomerAccountNumber,
+								contactId: 				item.OwnerContactID as String,
 								tierLevelCode: 			item.AccountTierLevelCode,
-								tribeDescription: 		item.AccountTierLevelDesc,
+								tierLevelDescription: 	item.AccountTierLevelDesc,
 								freezeCode: 			item.FreezeCode,
 								freezeDescription: 		item.FreezeDesc,
 								typeCode: 				item.AccountTypeCode,
 								typeDescription: 		item.AccountTypeDescription,
 								categoryCode: 			item.AccountCategoryCode,
 								categoryDescription: 	item.AccountCategoryDescription,
-								adminOfficerId: 		item.AdminOfficerContactID,
+								adminOfficerId: 		item.AdminOfficerContactID as String,
 								adminOfficerName: 		item.AdministratorName,
-								activeFlag: 			item.ActiveFlag,
+								activeFlag: 			if (item.ActiveFlag != 0) true else false,
 								openedDate: 			item.DateOpened,
 								closedDate: 			item.ClosedDate,
-								closedFlag: 			item.ClosedFlag,
+								closedFlag: 			if (item.ClosedFlag != 0) true else false,
 								line1: 					item.CustomerDescriptionLine1,
 								line2: 					item.CustomerDescriptionLine2,
 								line3: 					item.CustomerDescriptionLine3,

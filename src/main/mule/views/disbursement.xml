@@ -14,12 +14,12 @@
 		http://www.mulesoft.org/schema/mule/core 
 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 	
-	<flow name="view-agencyregiontribe">
+	<flow name="view-disbursement">
 
-		<logger level="INFO" category="app" message="#['Process Agency Reagion Tribe View']" />
+		<logger level="INFO" category="app" message="#['Process Cash Transaction View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="agencyreagiontribe" />
+        <set-variable doc:name="set view" variableName="view" value="cashtransaction" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -30,11 +30,12 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   CustomerAccountNumber_Key, Agency_Code, AgencyName, Region_Code, RegionName, " ++
-					"   Tribe_Code, TribeName, " ++
-					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM agencyreagiontribe  " ++
-					" WHERE ValidFrom > :validFrom "
+					"   CustomerAccountNumber, TransactionNumber, TransactionCode, DisbursementText, DebitCreditIndicator, " ++
+					"   Amount, Status, SettledFlag, PrincIncomeIndicator, TaxCode, TaxYear," ++
+					"   FORMAT(SettleDate, 'yyyy-MM-dd') AS SettleDate, " ++
+					"   FORMAT(LastModifiedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS LastModifiedDate " ++
+					" FROM cashtransaction  " ++
+					" WHERE LastModifiedDate > :LastModifiedDate "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
@@ -50,21 +51,26 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			item.CustomerAccountNumber_Key as String,
-								agencyCode: 		item.Agency_Code,
-								agencyDescription: 	item.AgencyName,
-								regionCode: 		item.Region_Code,
-								regionDescription: 	item.RegionName,
-								tribeCode: 			item.Tribe_Code,
-								tribeDescription: 	item.TribeName,
-								date: 				item.ValidFrom
+								account: 				item.CustomerAccountNumber as String,
+								transaction: 			item.TransactionNumber,
+								code: 					item.TransactionCode,
+								disbursementText: 		item.DisbursementText,
+								debitCreditIndicator: 	item.DebitCreditIndicator,
+								amount: 				item.Amount,
+								settleDate: 			item.SettleDate,
+								status: 				item.Status,
+								settleFlag: 			item.SettledFlag,
+								incomeIndicator: 		item.PrincIncomeIndicator,
+								taxCode: 				item.TaxCode,
+								taxYear: 				item.TaxYear,
+								date: 					item.LastModifiedDate
 							}
 							]]>
 						</ee:set-payload>
 					</ee:message>
 				</ee:transform>
 
-				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.agencyregion}" />
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.disbursement}" />
 				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
 				<flow-ref name="send-api"/>
             </when>

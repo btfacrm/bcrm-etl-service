@@ -76,9 +76,8 @@
 	<!-- ********************************************* --> 
 
 	<sub-flow name="mssql-query">
-
         <logger doc:name="sql query" level="INFO" category="app"
-            message="#[output application/java --- vars.query]"/>
+            message="#['Select query: ' ++ vars.query]"/>
 
 		<db:select doc:name="sqlserver select" config-ref="Database_Config">
             <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
@@ -89,12 +88,13 @@
 		</db:select>
 		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[sizeOf(payload)]'  />
 		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
+		<logger doc:name="num records" level="INFO" category="app"
+			message="#['Records retrieved from database: ' ++ (vars.recordsProcessed as String) ]"/>
 	</sub-flow>
 
     <sub-flow name="mssql-update">
-
         <logger doc:name="sql update" level="INFO" category="app"
-            message="#[output application/java --- vars.query]"/>
+            message="#['Update sql: ' ++ vars.query]"/>
 
 		<db:update doc:name="sqlserver update" config-ref="Database_Config">
             <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
@@ -107,11 +107,7 @@
 			</db:input-parameters>
 		</db:update>
 
-        <logger doc:name="result" level="INFO" category="app"
-            message="#[output application/json --- if ( payload != null) payload else 'No records found']"/>
-
-        <logger doc:name="total records" level="INFO" category="app" 
-            message="#[${file::script-records-found.dwl}]"/>
+        <!-- <logger level="INFO" category="app" message="#[ if ( payload != null) payload else 'No records found']"/> -->
 	</sub-flow>
 
 
@@ -122,10 +118,10 @@
 	<!-- ********************************************* --> 
 
 	<flow name="http-post">
-		<logger doc:name="call post method" level="INFO" category="app" 
+		<logger doc:name="call POST" level="INFO" category="app" 
 			message='#[ "Call POST method, path: " ++ vars.servicePath ++ ", statusValidator: " ++ (vars.statusValidator as String) ]' />
 
-		<logger doc:name="payload" level="INFO" category="app" message="#[payload]"/>
+		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
 
 		<http:request method="POST" config-ref="HTTP_Request_Configuration" path="#[vars.servicePath]">
 			<http:headers><![CDATA[#[output application/java ---
@@ -139,13 +135,14 @@
 				<http:success-status-code-validator values="#[vars.statusValidator]" />
 			</http:response-validator>
 		</http:request>
-		<logger doc:name="result" level="INFO" message='#[payload]' />
-		<logger doc:name="result" level="INFO" message='#[attributes.statusCode]' />
+		<logger doc:name="response" level="INFO" message='#[payload]' />
+		<logger doc:name="status code" level="INFO" message='#["Http status code: " ++ (attributes.statusCode as String)]' />
 		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
 		<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[payload]'/>
 
 		<error-handler>
 			<on-error-continue enableNotifications="false" logException="false">
+				<logger level="INFO" category="app" message="There was an error while calling the service through the POST method" />
 				<logger level="INFO" category="app" message="#[error.errorMessage]" />
 				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[error.errorMessage.attributes.statusCode]'  />
 				<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[error.detailedDescription]'/>
@@ -187,6 +184,7 @@
             </when>
 			<otherwise>
 				<!-- A successfull call to Salesforce API -->
+				<logger level="INFO" category="app" message="#['Success call to Salesforce API']" />
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#['200']"/>
 				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(payload, "application/json")]'  />
 				<ee:transform doc:name="update watermark" >
@@ -231,4 +229,9 @@
 			</ee:message>
 		</ee:transform>		        
     </sub-flow>
+
+	<sub-flow name="initialize">
+		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'/>
+		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
+	</sub-flow>
 </mule>
