@@ -3,55 +3,56 @@
 <mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
 	xmlns:file="http://www.mulesoft.org/schema/mule/file"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
-	
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+						http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+						http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+						http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+						http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
 
-	<flow name="btf-data-sync-scheduler-v1" doc:id="d3bb775f-1e4c-4ea7-a87a-970bb4ce245d" >
-		<scheduler doc:name="Scheduler" doc:id="c0d139c7-e156-4f8e-9ed7-daf896aea05f" >
-			<scheduling-strategy >
-				<fixed-frequency frequency="${schedular.frequency}" startDelay="${schedular.delay}" timeUnit="MINUTES"/>
+
+	<flow name="btf-data-sync-scheduler-v1" doc:id="d3bb775f-1e4c-4ea7-a87a-970bb4ce245d">
+		<scheduler doc:name="Scheduler" doc:id="c0d139c7-e156-4f8e-9ed7-daf896aea05f">
+			<scheduling-strategy>
+				<fixed-frequency frequency="${schedular.frequency}" startDelay="${schedular.delay}"
+					timeUnit="MINUTES" />
 			</scheduling-strategy>
 		</scheduler>
-		<flow-ref doc:name="contact" doc:id="9a6ea1f0-6621-42cf-8551-9b1f96e6876c" name="contact"/>
+		<flow-ref doc:name="contact" doc:id="9a6ea1f0-6621-42cf-8551-9b1f96e6876c" name="contact" />
 	</flow>
 
-<flow name="btf-data-sync-api-v1" doc:id="9fe10a61-2c87-46e9-8732-62d96d37bafa" >
-		<http:listener doc:name="Listener" doc:id="077835fa-589c-428a-ba2d-fb9a7e9383e6" path="${prcAPI.path}" config-ref="HTTP_Listener_config"/>
+	<flow name="btf-data-sync-api-v1" doc:id="9fe10a61-2c87-46e9-8732-62d96d37bafa">
+		<http:listener doc:name="Listener" doc:id="077835fa-589c-428a-ba2d-fb9a7e9383e6"
+			path="${prcAPI.path}" config-ref="HTTP_Listener_config" />
 		<async doc:name="Async" doc:id="eda779fa-542c-497f-b904-b20bc6d783dd">
-			<flow-ref doc:name="contact" doc:id="4ebde3ae-a9bd-48af-9677-02d8479a9105" name="contact" />
+			<flow-ref doc:name="contact" doc:id="4ebde3ae-a9bd-48af-9677-02d8479a9105"
+				name="contact" />
 		</async>
 	</flow>
-	<flow name="MultiJob" doc:id="3aa909b0-7b9f-47f0-9be1-af189f8c2c95" >
+	<flow name="MultiJob" doc:id="3aa909b0-7b9f-47f0-9be1-af189f8c2c95">
 		<scatter-gather doc:name="Scatter-Gather" doc:id="0a163fd3-6558-4faf-99ce-f95ef5ce0db6">
-					<route>
-						<flow-ref doc:name="phone" doc:id="eb976c31-e403-468e-a118-d73c9308c2aa" name="phone" />
-					</route>
-					<route>
-						<flow-ref doc:name="email" doc:id="2b71bbe5-c73f-435e-b750-10c0192d5338" name="email" />
-					</route>
-					<route>
-						<flow-ref doc:name="address" doc:id="b5a6cb4f-b14e-4f47-91b5-6d5eaf6af464" name="address" />
-					</route>
-					<route>
-						<flow-ref doc:name="balance" doc:id="72f51abd-0c10-411d-8b97-ed69c2597856" name="balance" />
-					</route>
-					<route>
-						<flow-ref doc:name="disbursment" doc:id="57330477-9bed-430b-9a72-4e108db71bb7" name="disbursment" />
-					
-</route>
-			<route >
-				<flow-ref doc:name="accountudf" doc:id="ba0da5a3-311d-41a5-90d3-ab7a08527cff" name="accountudf"/>
+			<route>
+				<flow-ref doc:name="phone" name="phone" />
 			</route>
-			<route >
-				<flow-ref doc:name="agencyregion" doc:id="fc8236cc-07ae-4d14-92d3-4ae973cee021" name="accountudf"/>
+			<route>
+				<flow-ref doc:name="address" name="address" />
 			</route>
-				
-</scatter-gather>
+			<route>
+				<flow-ref doc:name="balance" name="balance" />
+			</route>
+			<route>
+				<flow-ref doc:name="disbursment" name="disbursement" />
+			</route>
+			<route>
+				<flow-ref doc:name="accountudf" name="accountudf" />
+			</route>
+			<route>
+				<flow-ref doc:name="agencyregion" name="agencyregion" />
+			</route>
+
+		</scatter-gather>
 	</flow>
-	</mule>
+</mule>
