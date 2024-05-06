@@ -2,18 +2,22 @@
 
 <mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:email="http://www.mulesoft.org/schema/mule/email"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-<error-handler name="Error_Handler_global">
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="093476be-c8cc-492d-a574-f45b4a414654" type="ANY">
-				<logger level="INFO" doc:name="Logger" doc:id="959b1019-5513-4365-b3cb-360e8865e517" message="------------------------Error---------------------"/>
-				<ee:transform doc:name="Transform Message" doc:id="cf7a3bec-4bd8-4f12-b44d-340bef1259e1" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+						http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+						http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+						http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<error-handler name="Error_Handler_global">
+		<on-error-propagate enableNotifications="true" logException="true"
+			doc:name="On Error Propagate" doc:id="093476be-c8cc-492d-a574-f45b4a414654" type="ANY">
+			<logger level="INFO" doc:name="Logger" doc:id="959b1019-5513-4365-b3cb-360e8865e517"
+				message="------------------------Error---------------------" />
+			<ee:transform doc:name="Transform Message" doc:id="cf7a3bec-4bd8-4f12-b44d-340bef1259e1">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -22,17 +26,22 @@ output application/json
 	"timestamp" : now()
 	
 }]]></ee:set-payload>
-					</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="MailSubject" ><![CDATA['Data Sync Application Fail Alert']]></ee:set-variable>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="MailSubject"><![CDATA['Data Sync Application Fail Alert']]></ee:set-variable>
 				</ee:variables>
-				</ee:transform>
-				<flow-ref doc:name="Flow Reference" doc:id="6f490f1f-fb6b-46c4-93d3-83e0c7aa94eb" name="generate_EmailAlert"/>
-			</on-error-propagate>
-		</error-handler>
-				<sub-flow name="generate_EmailAlert" doc:id="6e790215-ed66-4673-9a8a-eeafe642600e" >
-		<logger level="INFO" doc:name="Logger" doc:id="9762c686-d5a8-44e8-ad49-19d4f49e941b" message="---------------------------Send email--------------"/>
-		<email:send doc:name="Send" doc:id="68e42906-0cd5-46be-b2e8-eb98862f06ac" config-ref="emailSMTP" fromAddress="${emailSMTP.fromAddress}" subject="#[vars.MailSubject]">
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="6f490f1f-fb6b-46c4-93d3-83e0c7aa94eb"
+				name="generate_EmailAlert" />
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="generate_EmailAlert" doc:id="6e790215-ed66-4673-9a8a-eeafe642600e">
+		<logger level="INFO" doc:name="Logger" doc:id="9762c686-d5a8-44e8-ad49-19d4f49e941b"
+			message="---------------------------Send email--------------" />
+
+		<!--
+		<email:send doc:name="Send" doc:id="68e42906-0cd5-46be-b2e8-eb98862f06ac" config-ref="emailSMTP"
+		fromAddress="${emailSMTP.fromAddress}" subject="#[vars.MailSubject]">
 			<email:to-addresses >
 				<email:to-address value="${emailSMTP.toAddress}" />
 			</email:to-addresses>
@@ -40,6 +49,7 @@ output application/json
 			</email:body>
 			<email:attachments ><![CDATA[#[vars.FailedRecords]]]></email:attachments>
 		</email:send>
+		-->
 	</sub-flow>
 
 </mule>
