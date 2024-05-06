@@ -96,7 +96,7 @@
         <logger doc:name="sql update" level="INFO" category="app"
             message="#['Update sql: ' ++ vars.query]"/>
 
-		<db:update doc:name="sqlserver update" config-ref="Database_Config">
+		<db:update doc:name="sqlserver update" config-ref="Database_Config_Watermark">
             <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{ 
 				validFrom: vars.validFrom,

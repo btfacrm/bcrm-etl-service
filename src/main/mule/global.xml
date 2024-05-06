@@ -7,7 +7,8 @@
 	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/api-gateway 
 		http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd 
@@ -15,6 +16,8 @@
 		http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd  
 		http://www.mulesoft.org/schema/mule/http 
 		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+		http://www.mulesoft.org/schema/mule/db 
+		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
 		http://www.mulesoft.org/schema/mule/tls 
 		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
 		http://www.mulesoft.org/schema/mule/core 
@@ -26,13 +29,18 @@
 	<import file="global-error.xml" />
 	<import file="global-configuration-sqlserver.xml" />
 	
-	<http:listener-config name="api-httpListenerConfig">
+
+	<!-- 5 hours timeout. Removed from listener-connection:
+			keepAlive="true"
+			responseTimeout="18000000"	
+	-->
+	<http:listener-config name="api-httpListenerConfig" >
 		<http:listener-connection
 			host="0.0.0.0"
+			protocol="HTTPS"
 			port="${https.port}"
-			protocol="${httpsprotocol}"
-			tlsContext="TLS_Context">
-		</http:listener-connection>
+			tlsContext="TLS_Context"
+			connectionIdleTimeout="18000000"/>
 	</http:listener-config>
 	
 	<http:request-config name="HTTP_Request_Configuration">
@@ -41,5 +49,13 @@
 			host="${service.host}" 
 			port="${service.port}" />
 	</http:request-config>
-		
+	
+	<db:config name="Database_Config_Watermark">
+		<db:mssql-connection 
+			host="${mssql.watermark.host}"
+			port="${mssql.watermark.port}"
+			user="${mssql.watermark.user}"
+			password='${mssql.watermark.password}'
+			databaseName="${mssql.watermark.database}" />
+	</db:config>
 </mule>
