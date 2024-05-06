@@ -30,10 +30,7 @@
 	<import file="global-configuration-sqlserver.xml" />
 	
 
-	<!-- 5 hours timeout. Removed from listener-connection:
-			keepAlive="true"
-			responseTimeout="18000000"	
-	-->
+	<!-- 5 hours timeout for the http connection -->
 	<http:listener-config name="api-httpListenerConfig" >
 		<http:listener-connection
 			host="0.0.0.0"
