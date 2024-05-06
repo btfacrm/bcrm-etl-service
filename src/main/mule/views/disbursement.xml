@@ -16,10 +16,10 @@
 	
 	<flow name="view-disbursement">
 
-		<logger level="INFO" category="app" message="#['Process Cash Transaction View']" />
+		<logger level="INFO" category="app" message="#['Process Disbursement View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="cashtransaction" />
+        <set-variable doc:name="set view" variableName="view" value="disbursement" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -33,9 +33,9 @@
 					"   CustomerAccountNumber, TransactionNumber, TransactionCode, DisbursementText, DebitCreditIndicator, " ++
 					"   Amount, Status, SettledFlag, PrincIncomeIndicator, TaxCode, TaxYear," ++
 					"   FORMAT(SettleDate, 'yyyy-MM-dd') AS SettleDate, " ++
-					"   FORMAT(LastModifiedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS LastModifiedDate " ++
+					"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
 					" FROM cashtransaction  " ++
-					" WHERE LastModifiedDate > :LastModifiedDate "
+					" WHERE EffectiveDate > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>

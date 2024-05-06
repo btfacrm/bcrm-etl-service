@@ -16,15 +16,15 @@
 	
 	<flow name="view-balance">
 
-		<logger level="INFO" category="app" message="#['Process Cash Balance View']" />
+		<logger level="INFO" category="app" message="#['Process Balance View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="cashbalance" />
+        <set-variable doc:name="set view" variableName="view" value="balance" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
         <set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
-		<ee:transform doc:name="query contact" >
+		<ee:transform doc:name="query balance" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 					output application/json skipNullOn="everywhere"
@@ -32,8 +32,8 @@
 					" SELECT top " ++ vars.maxRecords as String ++
 					"   CustomerAccountNumber, EndingAccountBalance, " ++
 					"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
-					" FROM cashbalance  " ++
-					" WHERE BalanceValidFrom > :BalanceValidFrom "
+					" FROM VWCrm_CashBalance_Book  " ++
+					" WHERE BalanceValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
@@ -49,9 +49,9 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 		item.CustomerAccountNumber as String,
-								balance: 		item.EndingAccountBalance,
-								date: 			item.BalanceValidFrom
+								account: 	item.CustomerAccountNumber as String,
+								balance: 	item.EndingAccountBalance as Number,
+								date: 		item.BalanceValidFrom
 							}
 							]]>
 						</ee:set-payload>

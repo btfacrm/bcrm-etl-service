@@ -143,9 +143,10 @@
 		<error-handler>
 			<on-error-continue enableNotifications="false" logException="false">
 				<logger level="INFO" category="app" message="There was an error while calling the service through the POST method" />
+				<logger level="INFO" category="app" message="#[error.errorMessage.payload]" />
 				<logger level="INFO" category="app" message="#[error.errorMessage]" />
 				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[error.errorMessage.attributes.statusCode]'  />
-				<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[error.detailedDescription]'/>
+				<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[error.errorMessage.payload]'/>
 			</on-error-continue>
 		</error-handler>
 	</flow>
