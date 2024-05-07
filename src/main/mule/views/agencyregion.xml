@@ -19,7 +19,7 @@
 		<logger level="INFO" category="app" message="#['Process Agency Reagion Tribe View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="agencyreagiontribe" />
+        <set-variable doc:name="set view" variableName="view" value="agencyregion" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -30,10 +30,15 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   CustomerAccountNumber_Key, Agency_Code, AgencyName, Region_Code, RegionName, " ++
-					"   Tribe_Code, TribeName, " ++
-					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM agencyreagiontribe  " ++
+					"   RTRIM(CustomerAccountNumber_Key) as CustomerAccountNumber_Key, " ++
+					"   RTRIM(Agency_Code) as Agency_Code, " ++
+					"   RTRIM(AgencyName) as AgencyName, " ++
+					"   RTRIM(Region_Code) as Region_Code, " ++
+					"   RTRIM(RegionName) as RegionName, " ++
+					"   RTRIM(Tribe_Code) as Tribe_Code, " ++
+					"   RTRIM(TribeName) as TribeName, " ++
+					"   FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					" FROM VWCrm_CustomerAccountNumber_Key  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
