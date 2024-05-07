@@ -30,11 +30,16 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   CustomerAccountNumber, TransactionNumber, TransactionCode, DisbursementText, DebitCreditIndicator, " ++
-					"   Amount, Status, SettledFlag, PrincIncomeIndicator, TaxCode, TaxYear," ++
-					"   FORMAT(SettleDate, 'yyyy-MM-dd') AS SettleDate, " ++
+					"   RTRIM(CustomerAccountNumber) as CustomerAccountNumber, " ++
+					"   RTRIM(TransactionNumber) as TransactionNumber, " ++
+					"   RTRIM(TransactionCode) as TransactionCode, " ++
+					"   RTRIM(Status) as Status, " ++
+					"   RTRIM(TaxCode) as TaxCode, " ++
+					"   RTRIM(DisbursementText) as DisbursementText,  " ++
+					"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
+					"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
 					"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
-					" FROM cashtransaction  " ++
+					" FROM VWCrm_Disbursement " ++
 					" WHERE EffectiveDate > :validFrom "
 				]]]>
 				</ee:set-variable>
@@ -56,14 +61,14 @@
 								code: 					item.TransactionCode,
 								disbursementText: 		item.DisbursementText,
 								debitCreditIndicator: 	item.DebitCreditIndicator,
-								amount: 				item.Amount,
+								amount: 				item.Amount as Number,
 								settleDate: 			item.SettleDate,
 								status: 				item.Status,
-								settleFlag: 			item.SettledFlag,
+								settleFlag: 			if (item.SettledFlag != 0) true else false,
 								incomeIndicator: 		item.PrincIncomeIndicator,
 								taxCode: 				item.TaxCode,
 								taxYear: 				item.TaxYear,
-								date: 					item.LastModifiedDate
+								date: 					item.EffectiveDate
 							}
 							]]>
 						</ee:set-payload>
