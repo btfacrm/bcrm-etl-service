@@ -19,7 +19,7 @@
 		<logger level="INFO" category="app" message="#['Process Account Master UDF View']" />
 
 		<!-- Read Watermark -->
-        <set-variable doc:name="set view" variableName="view" value="accountmasterudf" />
+        <set-variable doc:name="set view" variableName="view" value="accountudf" />
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
@@ -30,12 +30,17 @@
 					output application/json
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   CustomerAccountNumber, BirthCert_OnFile, Age_Of_Majority, " ++
-					"   Long_Name_Line_5, Pending_SocialServices_Assessment, Managed_Agency_Code, Managed_Agency_Name, Non_Responsive_Guardian, " ++
+					"   RTRIM(CustomerAccountNumber) as CustomerAccountNumber, " ++
+					"   RTRIM(Managed_Agency_Code) as Managed_Agency_Code, " ++
+					"   RTRIM(BirthCert_OnFile) as BirthCert_OnFile, " ++
+					"   RTRIM(Long_Name_Line_5) as Long_Name_Line_5, " ++
+					"   RTRIM(Pending_SocialServices_Assessment) as Pending_SocialServices_Assessment, " ++
+					"   RTRIM(Non_Responsive_Guardian) as Non_Responsive_Guardian, " ++
+					"   FORMAT(Age_Of_Majority, 'yyyy-MM-dd') AS Age_Of_Majority, " ++
 					"   FORMAT(DistPlan_ExpireDate, 'yyyy-MM-dd') AS DistPlan_ExpireDate, " ++
 					"   FORMAT(Temporary_CourtOrder_ExpireDate, 'yyyy-MM-dd') AS Temporary_CourtOrder_ExpireDate, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM accountmasterudf  " ++
+					" FROM VWCrm_AccountMaster_UDF  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
@@ -58,6 +63,11 @@
 								birthCertificate: 		item.BirthCert_OnFile,
 								ageMajority: 			item.Age_Of_Majority,
 								line5: 					item.Long_Name_Line_5,
+
+								pendingSocServ: if (!isEmpty(item.tierLevelCode)) item.tierLevelCode else "#N/A",
+
+								pendingSocServ: 			if (item.Pending_SocialServices_Assessment != 0) true else false,
+
 								pendingSocServ: 		item.Pending_SocialServices_Assessment,
 								managedAgencyCode: 		item.Managed_Agency_Code,
 								managedAgencyName: 		item.Managed_Agency_Name,

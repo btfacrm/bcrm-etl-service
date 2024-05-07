@@ -37,9 +37,9 @@
 					"   RTRIM(RegionName) as RegionName, " ++
 					"   RTRIM(Tribe_Code) as Tribe_Code, " ++
 					"   RTRIM(TribeName) as TribeName, " ++
-					"   FORMAT(validFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM VWCrm_CustomerAccountNumber_Key  " ++
-					" WHERE ValidFrom > :validFrom "
+					"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					" FROM Vcrm_RegionAgencyTribe " ++
+					" WHERE StartTime > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>

@@ -107,7 +107,7 @@ CREATE TABLE [VWCrm_AccountMaster_UDF] (
 )
 GO
 
-CREATE TABLE [VWCrm_CustomerAccountNumber_Key] (
+CREATE TABLE [Vcrm_RegionAgencyTribe] (
   [CustomerAccountNumber_Key] char(14) NOT NULL,
   [Agency_Code] varchar(4) NOT NULL,
   [AgencyName] varchar(40) NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE [VWCrm_CustomerAccountNumber_Key] (
   [RegionName] varchar(40) NOT NULL,
   [Tribe_Code] varchar(4) NOT NULL,
   [TribeName] varchar(40) NOT NULL,
-  [validFrom] datetime NOT NULL,
+  [StartTime] datetime NOT NULL,
   PRIMARY KEY ([CustomerAccountNumber_Key])
 )
 GO
