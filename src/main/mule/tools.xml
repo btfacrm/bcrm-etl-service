@@ -27,6 +27,8 @@
 
     <sub-flow name="watermark-read">
 
+		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Watermark" />
+
 		<ee:transform doc:name="query watermark" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
@@ -77,17 +79,32 @@
 
 	<sub-flow name="mssql-query">
         <logger doc:name="sql query" level="INFO" category="app"
-            message="#['Select query: ' ++ vars.query]"/>
+            message="#[output application/java --- 'Connection db:' ++ vars.connectionDb ++ ', query: ' ++ vars.query]"/>
 
-		<db:select doc:name="sqlserver select" config-ref="Database_Config_Main">
-            <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{ 
-				validFrom: vars.validFrom,
-				maxRecords: vars.maxRecords }]]]>
-			</db:input-parameters>
-		</db:select>
+		<choice doc:name="verify if query watermark" >
+			<when expression='#[ vars.connectionDb == "Database_Config_Main" ]'>
+				<db:select doc:name="sqlserver select" config-ref="Database_Config_Main">
+					<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{ 
+						validFrom: vars.validFrom,
+						maxRecords: vars.maxRecords }]]]>
+					</db:input-parameters>
+				</db:select>
+			</when>
+			<otherwise>
+				<db:select doc:name="sqlserver select" config-ref="Database_Config_Watermark">
+					<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{ 
+						validFrom: vars.validFrom,
+						maxRecords: vars.maxRecords }]]]>
+					</db:input-parameters>
+				</db:select>
+			</otherwise>
+		</choice>
+
 		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[sizeOf(payload)]'  />
 		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
+		<set-variable doc:name="restore connection db" variableName="connectionDb" value="Database_Config_Main" />
 		<logger doc:name="num records" level="INFO" category="app"
 			message="#['Records retrieved from database: ' ++ (vars.recordsProcessed as String) ]"/>
 	</sub-flow>
@@ -234,5 +251,6 @@
 	<sub-flow name="initialize">
 		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'/>
 		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
+		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Main" />
 	</sub-flow>
 </mule>
