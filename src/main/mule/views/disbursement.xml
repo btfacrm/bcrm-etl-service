@@ -39,7 +39,7 @@
 					"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
 					"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
 					"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
-					" FROM VWCrm_Disbursement " ++
+					" FROM VCrm_Disbursement " ++
 					" WHERE EffectiveDate > :validFrom "
 				]]]>
 				</ee:set-variable>

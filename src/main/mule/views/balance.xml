@@ -32,7 +32,7 @@
 					" SELECT top " ++ vars.maxRecords as String ++
 					"   CustomerAccountNumber, EndingAccountBalance, " ++
 					"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
-					" FROM VWCrm_CashBalance_Book  " ++
+					" FROM VCrm_CashBalance_Book  " ++
 					" WHERE BalanceValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>

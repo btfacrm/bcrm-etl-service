@@ -40,7 +40,7 @@
 					"   FORMAT(DistPlan_ExpireDate, 'yyyy-MM-dd') AS DistPlan_ExpireDate, " ++
 					"   FORMAT(Temporary_CourtOrder_ExpireDate, 'yyyy-MM-dd') AS Temporary_CourtOrder_ExpireDate, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM VWCrm_AccountMaster_UDF  " ++
+					" FROM VCrm_AccountMaster_UDF  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>

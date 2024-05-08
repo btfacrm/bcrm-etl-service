@@ -63,11 +63,11 @@
 
 	<db:config name="Database_Config_Main">
 		<db:mssql-connection 
-			host="${mssql.watermark.host}"
-			port="${mssql.watermark.port}"
-			user="${mssql.watermark.user}"
-			password='${mssql.watermark.password}'
-			databaseName="${mssql.watermark.database}">
+			host="${mssql.host}"
+			port="${mssql.port}"
+			user="${mssql.user}"
+			password='${mssql.password}'
+			databaseName="${mssql.database}">
 
 			<!-- Connection properties -->
 			<db:connection-properties>
