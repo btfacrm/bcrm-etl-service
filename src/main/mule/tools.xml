@@ -79,7 +79,7 @@
         <logger doc:name="sql query" level="INFO" category="app"
             message="#['Select query: ' ++ vars.query]"/>
 
-		<db:select doc:name="sqlserver select" config-ref="Database_Config">
+		<db:select doc:name="sqlserver select" config-ref="Database_Config_Main">
             <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{ 
 				validFrom: vars.validFrom,

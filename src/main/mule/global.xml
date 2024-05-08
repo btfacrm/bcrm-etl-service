@@ -26,9 +26,7 @@
 	<configuration-properties file="config.yaml" />
 	<validation:config name="Validation_Config" />
 	<import file="global-configuration-tls.xml" />
-	<import file="global-error.xml" />
-	<import file="global-configuration-sqlserver.xml" />
-	
+	<import file="global-error.xml" />	
 
 	<!-- 5 hours timeout for the http connection -->
 	<http:listener-config name="api-httpListenerConfig" >
@@ -53,6 +51,29 @@
 			port="${mssql.watermark.port}"
 			user="${mssql.watermark.user}"
 			password='${mssql.watermark.password}'
-			databaseName="${mssql.watermark.database}" />
+			databaseName="${mssql.watermark.database}">
+
+			<!-- Connection properties -->
+			<db:connection-properties>
+				<!-- Setting trustServerCertificate to true -->
+				<db:connection-property key="trustServerCertificate" value="true"/>
+			</db:connection-properties>
+		</db:mssql-connection>
+	</db:config>
+
+	<db:config name="Database_Config_Main">
+		<db:mssql-connection 
+			host="${mssql.watermark.host}"
+			port="${mssql.watermark.port}"
+			user="${mssql.watermark.user}"
+			password='${mssql.watermark.password}'
+			databaseName="${mssql.watermark.database}">
+
+			<!-- Connection properties -->
+			<db:connection-properties>
+				<!-- Setting trustServerCertificate to true -->
+				<db:connection-property key="trustServerCertificate" value="true"/>
+			</db:connection-properties>
+		</db:mssql-connection>
 	</db:config>
 </mule>
