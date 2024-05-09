@@ -56,7 +56,6 @@
 					output application/json
 					---
 					" UPDATE BCMS_WaterMark SET " ++ 
-					"   LastResponse = '', " ++
 					"   LastExecution = :lastExecution, " ++
 					"   Retries = 0 " ++
 					" WHERE ViewName = '" ++ vars.view ++ "'"
