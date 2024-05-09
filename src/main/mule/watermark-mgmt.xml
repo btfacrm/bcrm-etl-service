@@ -29,9 +29,11 @@
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 					output application/json
 					---
-                    " SELECT ViewName, Retries, LastErrorResponse, " ++
-					"        LastResponse AS LastResponse, " ++
-					"        LastErrorInputPayload AS ApiInputPayload, " ++
+                    " SELECT ViewName, " ++
+					"		 Retries, " ++
+					"		 LastErrorResponse, " ++
+					"        ApiResponse, " ++
+					"        ApiInputPayload, " ++
 					"		 FORMAT(LastExecution, 'yyyy-MM-dd HH:mm:ss.fff') AS LastExecution, " ++
 					"		 FORMAT(LastErrorDate, 'yyyy-MM-dd HH:mm:ss.fff') AS LastErrorDate " ++
                     " FROM BCMS_WaterMark " ++ 
@@ -59,9 +61,9 @@
 								retries: payload[0].Retries,
 								lastExecution: payload[0].LastExecution,
 								lastErrorDate: payload[0].LastErrorDate,
-								lastErrorResponse: read(payload[0].LastErrorResponse,"application/json"),
-								lastResponse: read(payload[0].LastResponse,"application/json"),
-								apiInputPyaload: read(payload[0].ApiInputPayload,"application/json")
+								(lastErrorResponse: read(payload[0].LastErrorResponse,"application/json")) if (!isEmpty(payload[0].LastErrorResponse)) ,
+								(apiResponse: read(payload[0].ApiResponse,"application/json")) if (!isEmpty(payload[0].ApiResponse)) ,
+								(apiInputPyaload: read(payload[0].ApiInputPayload,"application/json")) if (!isEmpty(payload[0].ApiInputPayload))
 							}
 							]]>
 						</ee:set-payload>

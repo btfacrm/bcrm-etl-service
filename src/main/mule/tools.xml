@@ -55,7 +55,7 @@
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 					output application/json
 					---
-					" UPDATE Watermark SET " ++ 
+					" UPDATE BCMS_WaterMark SET " ++ 
 					"   LastResponse = '', " ++
 					"   LastExecution = :lastExecution, " ++
 					"   Retries = 0 " ++
@@ -139,6 +139,7 @@
 			message='#[ "Call POST method, path: " ++ vars.servicePath ++ ", statusValidator: " ++ (vars.statusValidator as String) ]' />
 
 		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
+		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[write(payload, "application/json")]'  />
 
 		<http:request method="POST" config-ref="HTTP_Request_Configuration" path="#[vars.servicePath]">
 			<http:headers><![CDATA[#[output application/java ---
@@ -182,17 +183,16 @@
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#['500']"/>
 				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(vars.httpMessage, "application/json")]'  />
 				<set-variable doc:name="set lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
-				<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[write(payload, "application/json")]'  />
 				<ee:transform doc:name="update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json
 							---
 							" UPDATE BCMS_WaterMark SET " ++ 
-							"   LastResponse = :apiResponse, " ++
+							"   ApiResponse = :apiResponse, " ++
 							"   lastErrorDate = :lastExecution, " ++
 							"   LastErrorResponse = :lastErrorResponse, " ++
-							"   lastErrorInputPayload = :apiInputPayload, " ++
+							"   ApiInputPayload = :apiInputPayload, " ++
 							"   Retries = Retries + 1 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>
@@ -211,9 +211,9 @@
 							output application/json
 							---
 							" UPDATE BCMS_WaterMark SET " ++ 
-							"   LastResponse = :apiResponse, " ++
+							"   ApiResponse = :apiResponse, " ++
 							"   LastExecution = :lastExecution, " ++
-							"   lastErrorInputPayload = :apiInputPayload, " ++
+							"   ApiInputPayload = :apiInputPayload, " ++
 							"   Retries = 0 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>

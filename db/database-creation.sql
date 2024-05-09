@@ -1,11 +1,12 @@
-CREATE TABLE [Watermark] (
+
+CREATE TABLE [BCMS_WaterMark] (
   [ViewName] varchar(20) PRIMARY KEY,
   [LastExecution] datetime NOT NULL,
   [Retries] smallint NOT NULL,
   [LastErrorDate] datetime,
   [LastErrorResponse] text,
-  [LastErrorInputPayload] text,
-  [LastResponse] text
+  [ApiInputPayload] text,
+  [ApiResponse] text
 )
 GO
 
