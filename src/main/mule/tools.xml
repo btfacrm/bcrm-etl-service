@@ -35,7 +35,7 @@
 					output application/json
 					---
                     " SELECT ViewName, Retries, FORMAT(LastExecution, 'yyyy-MM-dd HH:mm:ss.fff') AS LastExecution " ++
-                    " FROM Watermark " ++ 
+                    " FROM BCMS_WaterMark " ++ 
                     " WHERE ViewName = '" ++ vars.view ++ "'"
 				]]]>
 				</ee:set-variable>
@@ -118,7 +118,7 @@
 			<db:input-parameters ><![CDATA[#[{ 
 				validFrom: vars.validFrom,
 				lastErrorResponse: vars.lastErrorResponse,
-				lastErrorInputPayload: vars.lastErrorInputPayload,
+				apiInputPayload: vars.apiInputPayload,
 				lastExecution: vars.lastExecution,
 				apiResponse: vars.apiResponse }]]]>
 			</db:input-parameters>
@@ -182,17 +182,17 @@
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#['500']"/>
 				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(vars.httpMessage, "application/json")]'  />
 				<set-variable doc:name="set lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
-				<set-variable doc:name="set lastErrorInputPayload" variableName="lastErrorInputPayload" value='#[write(payload, "application/json")]'  />
+				<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[write(payload, "application/json")]'  />
 				<ee:transform doc:name="update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json
 							---
-							" UPDATE Watermark SET " ++ 
+							" UPDATE BCMS_WaterMark SET " ++ 
 							"   LastResponse = :apiResponse, " ++
 							"   lastErrorDate = :lastExecution, " ++
 							"   LastErrorResponse = :lastErrorResponse, " ++
-							"   lastErrorInputPayload = :lastErrorInputPayload, " ++
+							"   lastErrorInputPayload = :apiInputPayload, " ++
 							"   Retries = Retries + 1 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>
@@ -210,9 +210,10 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json
 							---
-							" UPDATE Watermark SET " ++ 
+							" UPDATE BCMS_WaterMark SET " ++ 
 							"   LastResponse = :apiResponse, " ++
 							"   LastExecution = :lastExecution, " ++
+							"   lastErrorInputPayload = :apiInputPayload, " ++
 							"   Retries = 0 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>

@@ -62,4 +62,14 @@
 		<flow-ref  name="view-phone"/>
 	</flow>
 
+	<flow name="watermark">
+		<http:listener config-ref="api-httpListenerConfig" path="/watermark/{view}" />
+		<flow-ref  name="watermark-mgmt"/>
+	</flow>
+
+	<flow name="watermark-update">
+		<http:listener config-ref="api-httpListenerConfig" path="/watermark/" />
+		<flow-ref  name="watermark-mgmt-post"/>
+	</flow>
+
 </mule>

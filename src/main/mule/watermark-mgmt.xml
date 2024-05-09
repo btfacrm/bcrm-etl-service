@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+    xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+ 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+    xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http
+        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+		http://www.mulesoft.org/schema/mule/db 
+		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+		http://www.mulesoft.org/schema/mule/tls
+		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	
+    <sub-flow name="watermark-mgmt">
+
+		<set-variable doc:name="connection db" variableName="view" value="#[attributes.uriParams.view]" />
+		
+		<ee:transform doc:name="query watermark" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+					output application/json
+					---
+                    " SELECT ViewName, Retries, LastErrorResponse, " ++
+					"        LastResponse AS LastResponse, " ++
+					"        LastErrorInputPayload AS ApiInputPayload, " ++
+					"		 FORMAT(LastExecution, 'yyyy-MM-dd HH:mm:ss.fff') AS LastExecution, " ++
+					"		 FORMAT(LastErrorDate, 'yyyy-MM-dd HH:mm:ss.fff') AS LastErrorDate " ++
+                    " FROM BCMS_WaterMark " ++ 
+                    " WHERE ViewName = '" ++ vars.view ++ "'"
+				]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Watermark" />
+        <flow-ref name="mssql-query"/>
+		<!-- <logger doc:name="response" level="INFO" message='#[output application/json - payload]' /> -->
+
+		<choice doc:name="verify not empty payload" >
+            <when expression='#[ !isEmpty(payload) ]'>
+				<ee:transform doc:name="response" >
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+							output application/json
+							---
+							{
+								status: 200,
+								correlationId: correlationId,
+								view: payload[0].ViewName,
+								retries: payload[0].Retries,
+								lastExecution: payload[0].LastExecution,
+								lastErrorDate: payload[0].LastErrorDate,
+								lastErrorResponse: read(payload[0].LastErrorResponse,"application/json"),
+								lastResponse: read(payload[0].LastResponse,"application/json"),
+								apiInputPyaload: read(payload[0].ApiInputPayload,"application/json")
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>	
+			</when>
+			<otherwise>
+				<set-payload value="#['']" />
+			</otherwise>
+		</choice>
+    </sub-flow>
+
+	<sub-flow name="watermark-mgmt-post">
+
+		<set-variable doc:name="lastExecution" variableName="lastExecution" value="#[payload.lastExecution as DateTime]" />
+		<set-variable doc:name="view" variableName="view" value="#[payload.view]" />
+        <logger doc:name="lastExecution" level="INFO" category="app" message="#['lastExecution: ' ++ vars.lastExecution]"/>
+
+		<ee:transform doc:name="update watermark" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+					output application/json
+					---
+					" UPDATE BCMS_WaterMark SET " ++ 
+					"   LastExecution = :lastExecution " ++
+					" WHERE ViewName = '" ++ vars.view ++ "'"
+				]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+        <flow-ref name="mssql-update"/>
+
+		<ee:transform doc:name="response" >
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+					output application/json
+					---
+					{
+						status: 200,
+						correlationId: correlationId,
+						view: vars.view
+					}
+					]]>
+				</ee:set-payload>
+			</ee:message>
+		</ee:transform>	
+
+    </sub-flow>
+
+</mule>
