@@ -72,7 +72,7 @@
 								(dob: 			 item.DateOfBirth) if (!isEmpty(item.DateOfBirth)),
 								(dod: 			 item.DateOfDeath) if (!isEmpty(item.DateOfDeath)),
 								activeFlag: 	 !isEmpty(item.ActiveFlag) and item.ActiveFlag != 0,
-								disbursementFlag:!isEmpty(item.DisbursementElegibilityFlag) and item.DisbursementElegibilityFlag != 0,
+								disbursementFlag:!isEmpty(item.DisbursementEligibilityFlag) and item.DisbursementEligibilityFlag != 0,
 								date: 			 item.ValidFrom
 							}
 							]]>
