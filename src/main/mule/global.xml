@@ -44,6 +44,7 @@
 			host="${service.host}" 
 			port="${service.port}"
 			connectionIdleTimeout="600000"/>
+		<expiration-policy maxIdleTime="600000" timeUnit="MILLISECONDS" />
 	</http:request-config>
 	
 	<db:config name="Database_Config_Watermark">
