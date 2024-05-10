@@ -40,6 +40,7 @@
 	
 	<http:request-config name="HTTP_Request_Configuration">
 		<http:request-connection 
+			responseTimeout="600000"
 			protocol="${service.protocol}" 
 			host="${service.host}" 
 			port="${service.port}" />
