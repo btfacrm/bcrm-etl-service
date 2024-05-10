@@ -140,7 +140,8 @@
 		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
 		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[write(payload, "application/json")]'  />
 
-		<http:request method="POST" config-ref="HTTP_Request_Configuration" path="#[vars.servicePath]" responseTimeout="#[600000]">
+		<http:request config-ref="HTTP_Request_Configuration" 
+			method="POST" path="#[vars.servicePath]" responseTimeout="#[1800000]" sendCorrelationId="ALWAYS">
 			<http:headers><![CDATA[#[output application/java ---
 				{
 					"Content-Type"  : "application/json",
@@ -181,6 +182,7 @@
                 <logger level="INFO" category="app" message="#['There was an error in the Salesforce API']" />
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#['500']"/>
 				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(vars.httpMessage, "application/json")]'  />
+				<set-variable doc:name="set apiResponseRaw" variableName="apiResponseRaw" value='#[vars.httpMessage]'  />
 				<set-variable doc:name="set lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
 				<ee:transform doc:name="update watermark" >
 					<ee:variables >
@@ -204,6 +206,7 @@
 				<logger level="INFO" category="app" message="#['Success call to Salesforce API']" />
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#['200']"/>
 				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(payload, "application/json")]'  />
+				<set-variable doc:name="set apiResponseRaw" variableName="apiResponseRaw" value='#[payload]'  />
 				<ee:transform doc:name="update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
@@ -240,7 +243,8 @@
 						status: vars.httpStatus,
 						recordsProcessed: vars.recordsProcessed, 
 						serviceProcessingTime: vars.serviceProcessingTime,
-						correlationId: correlationId
+						correlationId: correlationId,
+						backendResponse: if (!isEmpty(vars.apiResponseRaw)) vars.apiResponseRaw else {}
 					}
 					]]>
 				</ee:set-payload>
