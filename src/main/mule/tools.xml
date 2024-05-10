@@ -252,5 +252,6 @@
 		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'/>
 		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
 		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Main" />
+		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
 	</sub-flow>
 </mule>

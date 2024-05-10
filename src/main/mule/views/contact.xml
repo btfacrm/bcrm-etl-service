@@ -23,7 +23,6 @@
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
-        <set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
 		<ee:transform doc:name="query contact" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
