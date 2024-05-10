@@ -140,7 +140,7 @@
 		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
 		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[write(payload, "application/json")]'  />
 
-		<http:request method="POST" config-ref="HTTP_Request_Configuration" path="#[vars.servicePath]">
+		<http:request method="POST" config-ref="HTTP_Request_Configuration" path="#[vars.servicePath]" responseTimeout="#[600000]">
 			<http:headers><![CDATA[#[output application/java ---
 				{
 					"Content-Type"  : "application/json",
