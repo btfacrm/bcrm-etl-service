@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule 
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" 
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core 
 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/ee/core 
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 		http://www.mulesoft.org/schema/mule/http
-		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 
 	<flow name="account">
 		<http:listener config-ref="api-httpListenerConfig" path="/account" />
@@ -48,6 +49,11 @@
 		<http:listener config-ref="api-httpListenerConfig" path="/contact" />
 		<flow-ref  name="initialize"/>
 		<flow-ref  name="view-contact"/>
+	</flow>
+
+	<flow name="contact-load">
+		<http:listener config-ref="api-httpListenerConfig" path="/contact-load" />
+		<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS"/>
 	</flow>
 
 	<flow name="disbursement">

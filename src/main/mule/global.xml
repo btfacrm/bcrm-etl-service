@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
 	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
 	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
@@ -22,6 +23,8 @@
 		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
 		http://www.mulesoft.org/schema/mule/core 
 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/vm
+		 http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
 ">
 	<configuration-properties file="config.yaml" />
 	<validation:config name="Validation_Config" />
@@ -78,4 +81,12 @@
 			</db:connection-properties>
 		</db:mssql-connection>
 	</db:config>
+
+	<vm:config name="VM_Config" doc:name="VM Config">
+		<vm:queues >
+			<vm:queue queueName="vm-contact" />
+			<vm:queue queueName="vm-account" />
+		</vm:queues>
+	</vm:config>
+
 </mule>

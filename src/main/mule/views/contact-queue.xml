@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+ 	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:opentelemetry="http://www.mulesoft.org/schema/mule/opentelemetry" 
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"  
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/batch
+		http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+		http://www.mulesoft.org/schema/mule/db 
+		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd		
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	
+	<flow name="queue-contact">
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="vm-contact"/>
+		<logger level="INFO" category="app" message="#['Process Contact View']" />
+
+		<!-- Read Watermark -->
+        <set-variable doc:name="view" variableName="view" value="contact" />
+		<flow-ref name="watermark-read" doc:name="read watermark"/>
+
+		<!-- Create query for Database View -->
+		<ee:transform doc:name="sql for view" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+					output application/json skipNullOn="everywhere"
+					---
+					" SELECT " ++
+					"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
+					"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
+					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
+					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
+					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					" FROM VCrm_ContactMaster  " ++
+					" WHERE ValidFrom > :validFrom "
+				]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+		<flow-ref name="mssql-query" doc:name="query db"/>
+
+		<set-variable doc:name="cycle" variableName="cycle" value="0" />
+		
+		<flow-ref name="mssql-query"/>
+
+		<choice doc:name="records to process?" >
+            <when expression='#[ vars.recordsProcessed > 0 ]'>
+				<ee:transform doc:name="api payload" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json
+							---
+							payload map (item, value) ->{
+								contactId: 		 item.ContactID as String,
+								(firstName: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
+								(lastName: 		 item.PrimaryLastName) if (!isEmpty(item.PrimaryLastName)),
+								(middleInitial:  item.PrimaryMiddleInitial) if (!isEmpty(item.PrimaryMiddleInitial)),
+								name: 			 item.ContactName,
+								(gender: 		 item.PrimaryGender) if (!isEmpty(item.PrimaryGender)),
+								(ssn: 			 item.SSN) if (!isEmpty(item.SSN)),
+								ssnFlag: 		 !isEmpty(item.SSNFlag) and item.SSNFlag != 0,
+								(dob: 			 item.DateOfBirth) if (!isEmpty(item.DateOfBirth)),
+								(dod: 			 item.DateOfDeath) if (!isEmpty(item.DateOfDeath)),
+								activeFlag: 	 !isEmpty(item.ActiveFlag) and item.ActiveFlag != 0,
+								disbursementFlag:!isEmpty(item.DisbursementEligibilityFlag) and item.DisbursementEligibilityFlag != 0,
+								date: 			 item.ValidFrom
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
+
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
+            </when>
+			<otherwise>
+				<logger doc:name="payload" level="INFO" category="app" message="No records found in database"/>
+				<!-- <flow-ref name="watermark-update-norecords"/> -->
+			</otherwise>
+        </choice>    
+
+		<logger doc:name="payload" level="INFO" category="app" message="#[payload]"/>
+
+        <error-handler ref="global-error-handler" />
+	</flow>
+</mule>
