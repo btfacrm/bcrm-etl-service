@@ -85,7 +85,9 @@
 	<vm:config name="VM_Config" doc:name="VM Config">
 		<vm:queues >
 			<vm:queue queueName="vm-contact" />
+			<vm:queue queueName="vm-contact-response" />
 			<vm:queue queueName="vm-account" />
+			<vm:queue queueName="vm-account-response" />
 		</vm:queues>
 	</vm:config>
 

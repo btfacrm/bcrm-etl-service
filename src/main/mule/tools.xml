@@ -82,30 +82,31 @@
 
 		<choice doc:name="verify if query watermark" >
 			<when expression='#[ vars.connectionDb == "Database_Config_Main" ]'>
-				<db:select doc:name="sqlserver select" config-ref="Database_Config_Main">
+				<db:select doc:name="database watermark" config-ref="Database_Config_Main">
 					<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 					<db:input-parameters ><![CDATA[#[{ 
 						validFrom: vars.validFrom,
+						offset: vars.offset,
 						maxRecords: vars.maxRecords }]]]>
 					</db:input-parameters>
 				</db:select>
 			</when>
 			<otherwise>
-				<db:select doc:name="sqlserver select" config-ref="Database_Config_Watermark">
+				<db:select doc:name="database main" config-ref="Database_Config_Watermark">
 					<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 					<db:input-parameters ><![CDATA[#[{ 
 						validFrom: vars.validFrom,
+						offset: vars.offset,
 						maxRecords: vars.maxRecords }]]]>
 					</db:input-parameters>
 				</db:select>
 			</otherwise>
 		</choice>
 
-		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[sizeOf(payload)]'  />
+		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload))  sizeOf(payload) else 0]'  />
 		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
 		<set-variable doc:name="restore connection db" variableName="connectionDb" value="Database_Config_Main" />
-		<logger doc:name="num records" level="INFO" category="app"
-			message="#['Records retrieved from database: ' ++ (vars.recordsProcessed as String) ]"/>
+		<logger doc:name="num records" level="INFO" category="app" message="#['Records from database: ' ++ (vars.recordsProcessed as String) ]"/>
 	</sub-flow>
 
     <sub-flow name="mssql-update">
@@ -256,6 +257,6 @@
 		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'/>
 		<set-variable doc:name="start service" variableName="start" value="#[now() as Number {unit: 'milliseconds'}]" />
 		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Main" />
-		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
+		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="5" />		
 	</sub-flow>
 </mule>

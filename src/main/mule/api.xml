@@ -53,7 +53,21 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="contact-load">
 		<http:listener config-ref="api-httpListenerConfig" path="/contact-load" />
-		<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS"/>
+		<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
+			<vm:content ><![CDATA[#[%dw 2.0
+				output application/json
+				---
+				{
+					"offset":0,
+					"batchNumber":0,
+					"totalRecords":0,
+					"startDate": now(),
+					"apiResponseHistory":[
+						],
+					"lastApiInputPayload":{}
+				}]]]></vm:content>
+		</vm:publish>
+		<vm:consume queueName="vm-contact-response" doc:name="Consume" config-ref="VM_Config" timeout="30" timeoutUnit="MINUTES"/>
 	</flow>
 
 	<flow name="disbursement">
@@ -73,7 +87,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 		<flow-ref  name="watermark-mgmt"/>
 	</flow>
 
-	<flow name="watermark-update">
+	<flow name="watermark-api-update">
 		<http:listener config-ref="api-httpListenerConfig" path="/watermark/" />
 		<flow-ref  name="watermark-mgmt-post"/>
 	</flow>
