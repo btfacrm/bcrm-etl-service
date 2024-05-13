@@ -60,7 +60,7 @@
 							---
 							payload map (item, value) ->{
 								contactId: 		 item.ContactID as String,
-								(firstNameXX: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
+								(firstName: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
 								(lastName: 		 item.PrimaryLastName) if (!isEmpty(item.PrimaryLastName)),
 								(middleInitial:  item.PrimaryMiddleInitial) if (!isEmpty(item.PrimaryMiddleInitial)),
 								name: 			 item.ContactName,
