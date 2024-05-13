@@ -34,10 +34,9 @@
 			<db:input-parameters ><![CDATA[#[{ 
 				validFrom: vars.validFrom,
 				lastErrorResponse: vars.lastErrorResponse,
-				apiInputPayload: write(vars.apiInputPayload, "application/json")  ,
 				lastExecution: vars.lastExecution,
-				apiResponse: vars.apiResponse }]]]>
-			</db:input-parameters>
+				apiResponse: write(vars.batchResponse, "application/json") 
+            }]]]></db:input-parameters>
 		</db:update>
 	</sub-flow>
 
@@ -158,7 +157,6 @@
 				<!-- There was an error in Salesforce API -->
                 <logger level="INFO" category="app" message="#['There was an error in the Salesforce API']" />
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#[500]"/>
-				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(vars.httpMessage, "application/json")]'  />
 				<set-variable doc:name="set lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
 				<ee:transform doc:name="query update watermark" >
 					<ee:variables >
@@ -169,7 +167,6 @@
 							"   ApiResponse = :apiResponse, " ++
 							"   lastErrorDate = :lastExecution, " ++
 							"   LastErrorResponse = :lastErrorResponse, " ++
-							"   ApiInputPayload = :apiInputPayload, " ++
 							"   Retries = Retries + 1 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>
@@ -180,7 +177,6 @@
 			<otherwise>
 				<!-- A successfull call to Salesforce API -->
 				<logger level="INFO" category="app" message="#['Success call to Salesforce API']" />
-				<set-variable doc:name="set apiResponse" variableName="apiResponse" value='#[write(payload, "application/json")]'  />
 				<ee:transform doc:name="query update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
@@ -189,7 +185,6 @@
 							" UPDATE BCMS_WaterMark SET " ++ 
 							"   ApiResponse = :apiResponse, " ++
 							"   LastExecution = :lastExecution, " ++
-							"   ApiInputPayload = :apiInputPayload, " ++
 							"   Retries = 0 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>
@@ -229,59 +224,70 @@
             </when>
             <otherwise>
                 <logger doc:name="payload" level="INFO" category="app" message="#['Finish processing, add current batch']"/>
-
-                <flow-ref name="update-watermark-results"/>
-
-                <vm:publish queueName="vm-contact-response" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
-                    <vm:content ><![CDATA[#[%dw 2.0
-                        output application/json
-        
-                        import * from dw::core::Periods
-                        import leftPad from dw::core::Strings
-                        
-                        var processingTime = now() - vars.startDate
-                        var milliseconds = processingTime as Number {unit: 'milliseconds'} mod 1000
-                        ---
-                        {
-                            status: vars.httpStatus,
-                            message: if (vars.httpStatus == 200)
-                                        "The process was executed successfully"
-                                     else
-                                        "There was an error, review the api response and server logs",
-                            "startDate": (vars.startDate as DateTime) as String {format:"yyyy-MM-dd HH:mm:ss"},
-                            "endDate": now() as String {format:"yyyy-MM-dd HH:mm:ss"},
-                            "processingTime": leftPad(processingTime.hours as String, 2, "0") ++ ":" ++ 
-                                                leftPad(processingTime.minutes as String, 2, "0") ++ ":" ++
-                                                leftPad((processingTime.seconds mod 60 as Number) as String, 2, "0") ++ ":" ++
-                                                leftPad(milliseconds as String, 3, "0"),
-                            "correlationId": correlationId,
-                            "updateWatermarkDate": if (vars.httpStatus == 200)
-                                                        vars.lastExecution
-                                                   else
-                                                        "On error the value is not updated"
-                        } ++
-                        if (vars.recordsProcessed > 0 )
+				<ee:transform doc:name="build the service response message">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="batchResponse" ><![CDATA[%dw 2.0
+							output application/json
+            
+                            import * from dw::core::Periods
+                            import leftPad from dw::core::Strings
+                            
+                            var processingTime = now() - vars.startDate
+                            var milliseconds = processingTime as Number {unit: 'milliseconds'} mod 1000
+                            ---
                             {
-                                "totalRecords": vars.totalRecords + vars.recordsProcessed,
-                                "batchSize": vars.batchNumber,
-                                "apiResponseHistory": vars.apiResponseHistory +
-                                    {	
-                                        "batchNumber" : vars.batchNumber,
-                                        "offset": vars.offset,
-                                        "apiStatus" : vars.httpStatus,
-                                        "apiResponse" : vars.httpMessage
-                                    },
-                                "lastApiInputPayload": vars.apiInputPayload
-                            }
-                        else
-                            {
-                                "totalRecords": vars.totalRecords,
-                                "batchSize": vars.batchNumber - 1,
-                                "apiResponseHistory": vars.apiResponseHistory,
-                                "lastApiInputPayload": {}
-                            }
-                    ]]]></vm:content>
-                </vm:publish>                
+                                status: vars.httpStatus,
+                                message: if (vars.httpStatus == 200)
+                                            "The process was executed successfully"
+                                        else
+                                            "There was an error, review the api response and server logs",
+                                "startDate": (vars.startDate as DateTime) as String {format:"yyyy-MM-dd HH:mm:ss"},
+                                "endDate": now() as String {format:"yyyy-MM-dd HH:mm:ss"},
+                                "processingTime": leftPad(processingTime.hours as String, 2, "0") ++ ":" ++ 
+                                                    leftPad(processingTime.minutes as String, 2, "0") ++ ":" ++
+                                                    leftPad((processingTime.seconds mod 60 as Number) as String, 2, "0") ++ ":" ++
+                                                    leftPad(milliseconds as String, 3, "0"),
+                                "correlationId": correlationId,
+                                "updateWatermarkDate": if (vars.httpStatus == 200)
+                                                            vars.lastExecution
+                                                    else
+                                                            "On error the value is not updated"
+                            } ++
+                            if (vars.recordsProcessed > 0 )
+                                {
+                                    "totalRecords": vars.totalRecords + vars.recordsProcessed,
+                                    "batchSize": vars.batchNumber,
+                                    "apiResponseHistory": vars.apiResponseHistory +
+                                        {	
+                                            "batchNumber" : vars.batchNumber,
+                                            "offset": vars.offset,
+                                            "apiStatus" : vars.httpStatus,
+                                            "apiResponse" : vars.httpMessage
+                                        },
+                                    "lastApiInputPayload": vars.apiInputPayload
+                                }
+                            else
+                                {
+                                    "totalRecords": vars.totalRecords,
+                                    "batchSize": vars.batchNumber - 1,
+                                    "apiResponseHistory": vars.apiResponseHistory,
+                                    "lastApiInputPayload": {}
+                                } 
+						]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+
+				<flow-ref name="update-watermark-results"/>
+
+				<vm:publish queueName="vm-contact-response" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
+                    <vm:content><![CDATA[#[%dw 2.0
+						output application/json
+						---
+						vars.batchResponse
+					]]]></vm:content>
+                </vm:publish>   
             </otherwise>
         </choice>
 	</sub-flow>

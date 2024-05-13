@@ -19,7 +19,7 @@
 		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	
 	<flow name="queue-contact">
-		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="vm-contact"/>
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="vm-contact" timeout="60" timeoutUnit="MINUTES"/>
 		<set-variable doc:name="set view to process" variableName="view" value="contact" />
 		<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.contact}" />
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
@@ -60,7 +60,7 @@
 							---
 							payload map (item, value) ->{
 								contactId: 		 item.ContactID as String,
-								(firstName: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
+								(firstNameXX: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
 								(lastName: 		 item.PrimaryLastName) if (!isEmpty(item.PrimaryLastName)),
 								(middleInitial:  item.PrimaryMiddleInitial) if (!isEmpty(item.PrimaryMiddleInitial)),
 								name: 			 item.ContactName,

@@ -67,7 +67,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 					"lastApiInputPayload":{}
 				}]]]></vm:content>
 		</vm:publish>
-		<vm:consume queueName="vm-contact-response" doc:name="Consume" config-ref="VM_Config" timeout="30" timeoutUnit="MINUTES"/>
+		<vm:consume queueName="vm-contact-response" doc:name="Consume" config-ref="VM_Config" timeout="60" timeoutUnit="MINUTES"/>
 	</flow>
 
 	<flow name="disbursement">

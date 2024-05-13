@@ -31,14 +31,14 @@
 	<import file="global-configuration-tls.xml" />
 	<import file="global-error.xml" />	
 
-	<!-- 5 hours timeout for the http connection -->
+	<!-- 1 hour timeout for the http connection -->
 	<http:listener-config name="api-httpListenerConfig" >
 		<http:listener-connection
 			host="0.0.0.0"
 			protocol="HTTPS"
 			port="${https.port}"
 			tlsContext="TLS_Context"
-			connectionIdleTimeout="18000000"/>
+			connectionIdleTimeout="3600000"/>
 	</http:listener-config>
 	
 	<http:request-config name="HTTP_Request_Configuration">
@@ -46,8 +46,8 @@
 			protocol="${service.protocol}" 
 			host="${service.host}" 
 			port="${service.port}"
-			connectionIdleTimeout="1800000"/>
-		<expiration-policy maxIdleTime="1800000" timeUnit="MILLISECONDS" />
+			connectionIdleTimeout="3600000"/>
+		<expiration-policy maxIdleTime="3600000" timeUnit="MILLISECONDS" />
 	</http:request-config>
 	
 	<db:config name="Database_Config_Watermark">
