@@ -204,7 +204,7 @@
 
     <sub-flow name="publish-message">
         <choice doc:name="determine how to route the flow" >
-            <when expression='#[ vars.recordsProcessed == vars.maxRecords and vars.httpStatus == 200]'>
+            <when expression='#[ vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200]'>
 				<logger doc:name="payload" level="INFO" category="app" message="#['Trigger a new batch process to find more records']"/>
 				<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
 					<vm:content ><![CDATA[#[%dw 2.0
@@ -297,7 +297,7 @@
 		<set-variable doc:name="set totalRecords" variableName="totalRecords" value='#[payload.totalRecords as Number]' />
 		<set-variable doc:name="set apiResponseHistory" variableName="apiResponseHistory" value='#[payload.apiResponseHistory]' />
 		<set-variable doc:name="set startDate" variableName="startDate" value='#[payload.startDate as DateTime]' />
-		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
+		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[${maxrecords}]" />
 
         <!-- The expected result from the salesforce API-->
         <set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
