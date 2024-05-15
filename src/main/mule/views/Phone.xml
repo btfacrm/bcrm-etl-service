@@ -31,7 +31,7 @@
 					" SELECT top " ++ vars.maxRecords as String ++
 					"   INNO_ID, ContactID, PhoneTypeCode, PhoneNumber, PrimaryPhoneNumberFlag, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM phone  " ++
+					" FROM VWCrm_ContactPhones  " ++
 					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
