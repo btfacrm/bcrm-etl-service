@@ -30,7 +30,7 @@
 					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
-					"   INNO_ID, ContactID, AddressType, email, Address1, Address2, Address3, " ++
+					"   INNO_ID, ContactID, AddressType, Address1, Address2, Address3, " ++
 					"   City, State, ZipCode, CountryCode, primaryaddressflag, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 					" FROM VCrm_Addresses " ++
@@ -53,7 +53,6 @@
 								addressId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
 								'type': 			item.AddressType,
-								email: 			item.email,
 								address1: 		item.Address1,
 								address2: 		item.Address2,
 								address3: 		item.Address3,
