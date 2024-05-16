@@ -34,7 +34,7 @@
 					"   City, State, ZipCode, CountryCode, primaryaddressflag, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 					" FROM VCrm_Addresses " ++
-					" WHERE ValidFrom > :validFrom "
+					" WHERE ValidFrom > :validFrom AND AddressType != 'eMail   '"
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
@@ -60,7 +60,7 @@
 								state: 			item.State,
 								zipCode: 		item.ZipCode,
 								CountryCode: 	item.CountryCode,
-								primary: 		item.primaryaddressflag,
+								primary: 		!isEmpty(item.primaryaddressflag) and item.primaryaddressflag != 0,
 								date: 			item.ValidFrom
 							}
 							]]>

@@ -52,7 +52,7 @@
 								contactId:	item.ContactID as String,
 								'type':		item.PhoneTypeCode,
 								number:		item.PhoneNumber,
-								primary:	item.PrimaryPhoneNumberFlag,
+								primary:	!isEmpty(item.PrimaryPhoneNumberFlag) and item.PrimaryPhoneNumberFlag != 0,
 								date:		item.ValidFrom
 							}
 							]]>
