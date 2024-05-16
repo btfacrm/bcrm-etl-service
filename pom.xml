@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>176302a0-a94d-44e9-a517-9e6dc9548d0d</groupId>
 	<artifactId>bcrm-etl-service-asset</artifactId>
-	<version>1.1.24</version>
+	<version>1.1.25</version>
 	<packaging>mule-application</packaging>
 	<name>bcrm-etl-service</name>
 	<description>BCRM ETL process for SSOT</description>
@@ -83,4 +83,12 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>anypoint-exchange-v3</id>
+			<name>Anypoint Exchange V3</name>
+			<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
 </project>

@@ -23,10 +23,10 @@
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
-		<ee:transform doc:name="query contact" >
+		<ee:transform doc:name="query Account" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
-					output application/json
+					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
 					"   CustomerAccountNumber, OwnerContactID, AccountTierLevelNum, AccountTierLevelDesc, FreezeCode, FreezeDesc, " ++
@@ -53,28 +53,28 @@
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								account: 				item.CustomerAccountNumber,
-								contactId: 				item.OwnerContactID as String,
-								tierLevelCode: 			item.AccountTierLevelCode,
-								tierLevelDescription: 	item.AccountTierLevelDesc,
-								freezeCode: 			item.FreezeCode,
-								freezeDescription: 		item.FreezeDesc,
-								typeCode: 				item.AccountTypeCode,
-								typeDescription: 		item.AccountTypeDescription,
-								categoryCode: 			item.AccountCategoryCode,
-								categoryDescription: 	item.AccountCategoryDescription,
-								adminOfficerId: 		item.AdminOfficerContactID as String,
-								adminOfficerName: 		item.AdministratorName,
-								activeFlag: 			if (item.ActiveFlag != 0) true else false,
-								openedDate: 			item.DateOpened,
-								closedDate: 			item.ClosedDate,
-								closedFlag: 			if (item.ClosedFlag != 0) true else false,
-								line1: 					item.CustomerDescriptionLine1,
-								line2: 					item.CustomerDescriptionLine2,
-								line3: 					item.CustomerDescriptionLine3,
-								line4: 					item.CustomerDescriptionLine4,
-								date: 					item.ValidFrom,
-								statementDate: 			item.StatementDateTime
+								account: 			   trim(item.CustomerAccountNumber),
+								contactId: 			   trim(item.OwnerContactID as String),
+								tierLevelCode: 		   trim(item.AccountTierLevelCode),
+								tierLevelDescription:  trim(item.AccountTierLevelDesc),
+								freezeCode: 		   trim(item.FreezeCode),
+								freezeDescription: 	   trim(item.FreezeDesc),
+								typeCode: 			   trim(item.AccountTypeCode),
+								typeDescription: 	   trim(item.AccountTypeDescription),
+								categoryCode: 		   trim(item.AccountCategoryCode),
+								categoryDescription:   trim(item.AccountCategoryDescription),
+								adminOfficerId: 	   trim(item.AdminOfficerContactID) as String,
+								adminOfficerName: 	   trim(item.AdministratorName),
+								activeFlag: 		   if (item.ActiveFlag != 0) true else false,
+								openedDate: 		   trim(item.DateOpened),
+								closedDate: 		   trim(item.ClosedDate),
+								closedFlag: 		   if (item.ClosedFlag != 0) true else false,
+								line1: 				   trim(item.CustomerDescriptionLine1),
+								line2: 				   trim(item.CustomerDescriptionLine2),
+								line3: 				   trim(item.CustomerDescriptionLine3),
+								line4: 				   trim(item.CustomerDescriptionLine4),
+								date: 				   trim(item.ValidFrom),
+								statementDate: 		   trim(item.StatementDateTime)
 							}
 							]]>
 						</ee:set-payload>

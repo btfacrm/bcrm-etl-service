@@ -48,7 +48,7 @@
 				<ee:transform doc:name="api payload" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
-							output application/json
+							output application/json skipNullOn="everywhere"
 
 							// Next functions mask sensitive data and are only temporal before production
 							fun maskData(num: Any) = "*masked*"

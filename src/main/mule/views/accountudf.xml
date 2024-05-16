@@ -23,10 +23,10 @@
 		<flow-ref name="watermark-read"/>
 
 		<!-- Create query for Database View -->
-		<ee:transform doc:name="query contact" >
+		<ee:transform doc:name="query accountudf" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
-					output application/json
+					output application/json skipNullOn="everywhere"
 					---
 					" SELECT top " ++ vars.maxRecords as String ++
 					"   RTRIM(CustomerAccountNumber) as CustomerAccountNumber, " ++
