@@ -34,8 +34,7 @@
 					"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
 					"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM VCrm_ContactMaster  " ++
-					" WHERE ValidFrom > :validFrom "
+					" FROM VCrm_ContactMaster  " 
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
