@@ -62,12 +62,7 @@
 								birthCertificate: 		item.BirthCert_OnFile,
 								ageMajority: 			item.Age_Of_Majority,
 								line5: 					item.Long_Name_Line_5,
-
-								pendingSocServ: if (!isEmpty(item.tierLevelCode)) item.tierLevelCode else "#N/A",
-
-								pendingSocServ: 			if (item.Pending_SocialServices_Assessment != 0) true else false,
-
-								pendingSocServ: 		item.Pending_SocialServices_Assessment,
+								pendingSocServ: 		if (item.Pending_SocialServices_Assessment != 0) true else false,
 								managedAgencyCode: 		item.Managed_Agency_Code,
 								managedAgencyName: 		item.Managed_Agency_Name,
 								nonResponsiveGuardian: 	item.Non_Responsive_Guardian,
