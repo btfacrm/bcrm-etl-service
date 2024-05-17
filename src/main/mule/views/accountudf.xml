@@ -59,7 +59,7 @@
 								account: 				item.CustomerAccountNumber_Key as String,
 								distributionExpiration: item.DistPlan_ExpireDate,
 								temporaryCourtOrderExp: item.Temporary_CourtOrder_ExpireDate,
-								birthCertificate: 		item.BirthCert_OnFile,
+								birthCertificate: 		if (item.BirthCert_OnFile != 0) true else false,
 								ageMajority: 			item.Age_Of_Majority,
 								line5: 					item.Long_Name_Line_5,
 								pendingSocServ: 		if (item.Pending_SocialServices_Assessment != 0) true else false,
