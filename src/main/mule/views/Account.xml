@@ -36,7 +36,8 @@
 					"   FORMAT(ClosedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ClosedDate, " ++
 					"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime, " ++
 					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-					" FROM Vcrm_AccountMaster "
+					" FROM Vcrm_AccountMaster " ++
+					" WHERE ValidFrom > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
