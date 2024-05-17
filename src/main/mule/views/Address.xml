@@ -52,7 +52,7 @@
 							payload map (item, value) ->{
 								addressId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
-								'type': 			capitalize(trim(item.AddressType)),
+								'type': 			capitalize(trim(item.AddressType as String)),
 								address1: 		item.Address1,
 								address2: 		item.Address2,
 								address3: 		item.Address3,
