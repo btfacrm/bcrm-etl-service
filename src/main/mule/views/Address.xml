@@ -60,7 +60,7 @@
 								state: 			item.State,
 								zipCode: 		item.ZipCode,
 								country: 		item.CountryCode as String,
-								primary: 		!isEmpty(item.primaryaddressflag) and item.primaryaddressflag != 0,
+								primary: 		if (item.primaryaddressflag != 0) true else false,
 								date: 			item.ValidFrom
 							}
 							]]>
