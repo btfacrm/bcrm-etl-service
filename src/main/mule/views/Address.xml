@@ -47,6 +47,7 @@
 				<ee:transform doc:name="api payload" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
+							import * from dw::core::Strings
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
