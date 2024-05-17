@@ -59,7 +59,7 @@
 								city: 			item.City,
 								state: 			item.State,
 								zipCode: 		item.ZipCode,
-								CountryCode: 	item.CountryCode as String,
+								country: 		item.CountryCode as String,
 								primary: 		!isEmpty(item.primaryaddressflag) and item.primaryaddressflag != 0,
 								date: 			item.ValidFrom
 							}

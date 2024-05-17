@@ -48,7 +48,7 @@
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								account: 	item.CustomerAccountNumber as String,
+								account: 	trim(item.CustomerAccountNumber as String),
 								balance: 	item.EndingAccountBalance as Number,
 								date: 		item.BalanceValidFrom
 							}
