@@ -38,9 +38,9 @@
 					"   FORMAT(Age_Of_Majority, 'yyyy-MM-dd') AS Age_Of_Majority, " ++
 					"   FORMAT(DistPlan_ExpireDate, 'yyyy-MM-dd') AS DistPlan_ExpireDate, " ++
 					"   FORMAT(Temporary_CourtOrder_ExpireDate, 'yyyy-MM-dd') AS Temporary_CourtOrder_ExpireDate, " ++
-					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
 					" FROM VCrm_AccountMaster_UDF  " ++
-					" WHERE ValidFrom > :validFrom "
+					" WHERE StartTime > :validFrom "
 				]]]>
 				</ee:set-variable>
 			</ee:variables>
@@ -71,7 +71,7 @@
 								managedAgencyCode: 		item.Managed_Agency_Code,
 								managedAgencyName: 		item.Managed_Agency_Name,
 								nonResponsiveGuardian: 	item.Non_Responsive_Guardian,
-								date: 					item.ValidFrom
+								date: 					item.StartTime
 							}
 							]]>
 						</ee:set-payload>
