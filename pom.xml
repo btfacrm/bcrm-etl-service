@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>176302a0-a94d-44e9-a517-9e6dc9548d0d</groupId>
 	<artifactId>bcrm-etl-service-asset</artifactId>
-	<version>1.1.37</version>
+	<version>2.1.0</version>
 	<packaging>mule-application</packaging>
 	<name>bcrm-etl-service</name>
 	<description>BCRM ETL process for SSOT</description>
@@ -23,6 +23,11 @@
 		<fields key="sourceCode">https://github.com/btfacrm/bcrm-etl-service</fields>
 
 		<codecoverage.application>0</codecoverage.application>
+
+		<!-- RAML specification -->
+		<restconnector.api.spec.group>${project.groupId}</restconnector.api.spec.group>
+		<restconnector.api.spec.artifact>bcrm-etl-service</restconnector.api.spec.artifact>
+		<restconnector.api.spec.version>1.0.4</restconnector.api.spec.version>
 	</properties>
 
 	<build>
@@ -42,12 +47,22 @@
 							<artifactId>mssql-jdbc</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
+					<classifier>mule-application</classifier>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
+
+		<!-- RAML specification -->
+		<dependency>
+			<groupId>${restconnector.api.spec.group}</groupId>
+			<artifactId>${restconnector.api.spec.artifact}</artifactId>
+			<version>${restconnector.api.spec.version}</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
+		</dependency>
 
 		<!-- Common Assets -->
 		<dependency>
@@ -82,13 +97,17 @@
 			<version>2.0.1</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-objectstore-connector</artifactId>
+			<version>1.2.2</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>mule-cloudhub-connector</artifactId>
+			<version>1.2.0</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<id>anypoint-exchange-v3</id>
-			<name>Anypoint Exchange V3</name>
-			<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
-			<layout>default</layout>
-		</repository>
-	</repositories>
 </project>

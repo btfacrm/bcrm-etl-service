@@ -1,0 +1,126 @@
+<mule
+    xmlns:os="http://www.mulesoft.org/schema/mule/os"
+    xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+    xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http
+        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+		http://www.mulesoft.org/schema/mule/db 
+		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/vm 
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	
+
+	<!-- ********************************************* --> 
+	<!-- Database operations -->
+	<!-- ********************************************* --> 
+
+    <sub-flow name="mssql-watermark-update">
+        <!-- <logger doc:name="sql update" level="INFO" category="app" message="#['Update sql: ' ++ vars.query]"/> -->
+        <logger doc:name="sql update" level="INFO" category="app" message="#['Update watermark']"/>
+
+		<db:update doc:name="sqlserver update" config-ref="Database_Config_Watermark">
+            <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ 
+				validFrom: vars.validFrom,
+				lastErrorResponse: vars.lastErrorResponse,
+				lastExecution: vars.lastExecution,
+				apiResponse: write(vars.batchResponse, "application/json") 
+            }]]]></db:input-parameters>
+		</db:update>
+	</sub-flow>
+
+	<sub-flow name="mssql-watermark-query">
+        <!-- <logger doc:name="sql query" level="INFO" category="app" message="#['watermark db query: ' ++ vars.query]"/> -->
+        <logger doc:name="sql update" level="INFO" category="app" message="#['Query watermark']"/>
+
+        <db:select doc:name="database watermark" config-ref="Database_Config_Watermark">
+            <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
+            <db:input-parameters ><![CDATA[#[{ 
+                validFrom: vars.validFrom
+            }]]]>
+            </db:input-parameters>
+        </db:select>
+
+		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload)) sizeOf(payload) else 0]'  />
+		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
+		<!-- <logger doc:name="num records" level="INFO" category="app" message="#['Records from watermark: ' ++ (vars.recordsProcessed as String) ]"/> -->
+	</sub-flow>
+
+	<sub-flow name="mssql-main-query">
+        <!-- <logger doc:name="sql query" level="INFO" category="app" message="#['main db query: ' ++ vars.query]"/> -->
+		<logger level="INFO" category="app" message="#['Query main db, validFrom: ' ++ vars.validFrom]" />
+
+		<db:select doc:name="database main" config-ref="Database_Config_Main">
+			<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ 
+				validFrom: vars.validFrom
+            }]]]>
+			</db:input-parameters>
+		</db:select>
+		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload)) sizeOf(payload) else 0]'  />
+		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
+		<logger doc:name="num records" level="INFO" category="app" message="#['Records from main db: ' ++ (vars.recordsProcessed as String) ]"/>
+        
+        <!-- if the response from database is empty then an error is raised when finish the execution of the flow/queue. 
+            Just by publishing a message to queue is not sufficient to set the payload. The payload must be
+            initialized with an empty value
+        -->
+        <choice doc:name="initialize payload?" >
+            <when expression='#[ vars.recordsProcessed == 0 ]'>
+                <set-payload doc:name="initialize payload to avoid error" value="#[{}]"/>
+                <set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
+            </when>
+        </choice>
+	</sub-flow>
+
+	<!-- ********************************************* --> 
+	<!-- HTTP request utilities                        -->
+	<!-- ********************************************* --> 
+
+	<flow name="call-api">
+		<logger doc:name="call POST" level="INFO" category="app" 
+			message='#[ "Call POST method, path: " ++ vars.servicePath ++ ", statusValidator: " ++ (vars.statusValidator as String) ]' />
+
+		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
+		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[payload]'  />
+
+		<http:request config-ref="HTTP_Request_Configuration" 
+			method="POST" path="#[vars.servicePath]" responseTimeout="#[1800000]" sendCorrelationId="ALWAYS">
+			<http:headers><![CDATA[#[output application/java ---
+				{
+					"Content-Type"  : "application/json",
+                    "client_id"     : "${service.clientid}",
+                    "client_secret" : "${service.clientsecret}"
+				}]]]>
+			</http:headers>
+			<http:response-validator>
+				<http:success-status-code-validator values="#[vars.statusValidator]" />
+			</http:response-validator>
+		</http:request>
+		<logger doc:name="response" level="INFO" message='#[payload]' />
+		<logger doc:name="status code" level="INFO" message='#["Http status code: " ++ (attributes.statusCode as String)]' />
+		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
+		<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[payload]'/>
+
+		<error-handler>
+			<on-error-continue enableNotifications="false" logException="false">
+				<logger level="INFO" category="app" message="There was an error while calling the service through the POST method" />
+				<logger level="INFO" category="app" message="#[error.errorMessage.payload]" />
+				<logger level="INFO" category="app" message="#[error.errorMessage]" />
+				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[error.errorMessage.attributes.statusCode]'  />
+				<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[error.errorMessage.payload]'/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

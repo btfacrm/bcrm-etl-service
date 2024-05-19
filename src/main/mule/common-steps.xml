@@ -1,0 +1,115 @@
+<mule
+    xmlns:os="http://www.mulesoft.org/schema/mule/os"
+    xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+ 	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+    xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http
+        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+		http://www.mulesoft.org/schema/mule/db 
+		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+		http://www.mulesoft.org/schema/mule/tls
+		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+        http://www.mulesoft.org/schema/mule/vm 
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	
+    <sub-flow name="save-status-step1" doc:name="save batch status 1">
+		<os:store doc:name="Store" objectStore="Object_store" key="#[vars.view]">
+			<os:value><![CDATA[#[
+				output application/json
+				---
+				{
+ 					step: 1,
+					stepDescription: "Sending first message to batch",
+					currentBatchMetadata: vars.queueMessage
+				}
+				]]]>
+			</os:value>
+		</os:store>	
+    </sub-flow>
+
+    <sub-flow name="save-status-step2" doc:name="save batch status 2">
+		<os:store doc:name="Store" objectStore="Object_store" key="#[vars.view]">
+			<os:value><![CDATA[#[
+				output application/json
+				---
+				{
+					step: 2,
+					stepDescription: "ETL queue received message and querying watermark for validFrom filter",
+					currentBatchMetadata: vars.queueMessage
+				}
+				]]]>
+			</os:value>
+		</os:store>	
+    </sub-flow>
+
+    <sub-flow name="save-status-step3" doc:name="save batch status 3">
+		<os:store doc:name="Store" objectStore="Object_store" key="#[vars.view]">
+			<os:value><![CDATA[#[
+				output application/json
+				---
+				{
+					step: 3,
+					stepDescription: "Querying database to get the batch records",
+					currentBatchMetadata: vars.queueMessage
+				}
+				]]]>
+			</os:value>
+		</os:store>	
+    </sub-flow>
+
+    <sub-flow name="save-status-step4" doc:name="save batch status 4">
+		<os:store doc:name="Store" objectStore="Object_store" key="#[vars.view]">
+			<os:value><![CDATA[#[
+				output application/json
+				---
+				{
+					step: 4,
+					stepDescription: "Querying database to get the batch records",
+					currentBatchMetadata: vars.queueMessage
+				}
+				]]]>
+			</os:value>
+		</os:store>	
+    </sub-flow>
+
+    <sub-flow name="save-status-step5" doc:name="save batch status 5">
+		<os:store doc:name="Store" objectStore="Object_store" key="#[vars.view]">
+			<os:value><![CDATA[#[
+				output application/json
+				---
+				{
+					step: 5,
+					stepDescription: "Sending records to API",
+					currentBatchMetadata: vars.queueMessage
+				}
+				]]]>
+			</os:value>
+		</os:store>	
+    </sub-flow>
+
+    <sub-flow name="save-status-step6" doc:name="save batch status 6">
+		<os:store doc:name="Store" objectStore="Object_store" key="#[vars.view]">
+			<os:value><![CDATA[#[
+				output application/json
+				---
+				{
+					step: 6,
+					stepDescription: "Save results in Watermark and routing message to next queue",
+					currentBatchMetadata: vars.queueMessage
+				}
+				]]]>
+			</os:value>
+		</os:store>	
+    </sub-flow>
+</mule>

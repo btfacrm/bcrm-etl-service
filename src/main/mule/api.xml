@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule 
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" 
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" 
 	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" 
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core 
 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
@@ -13,83 +16,60 @@
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 		http://www.mulesoft.org/schema/mule/http
 		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+		http://www.mulesoft.org/schema/mule/vm
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/mule-apikit 
+		http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  
+		http://www.mulesoft.org/schema/mule/cloudhub 
+		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 
-	<flow name="account">
-		<http:listener config-ref="api-httpListenerConfig" path="/account" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-account"/>
-	</flow>
-	
-	<flow name="accountudf">
-		<http:listener config-ref="api-httpListenerConfig" path="/accountudf" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-accountudf"/>
-	</flow>
+    <flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]"> 
+                <http:body>#[payload default {}]</http:body>
+                <http:headers>#[(vars.outboundHeaders default {}) ++ ({"correlationId" : correlationId})]</http:headers>
+            </http:error-response> 
+        </http:listener>
+		<apikit:router config-ref="api-config" />
+		<error-handler ref="global-error-handler"/>
+    </flow>
 
-	<flow name="address">
-		<http:listener config-ref="api-httpListenerConfig" path="/address" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-address"/>
-	</flow>
+    <flow name="api-console">
+        <http:listener config-ref="api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body> 
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener> 
+        <apikit:console config-ref="api-config" />
+		<error-handler ref="global-error-handler" />
+    </flow>
 
-	<flow name="agencyregion">
-		<http:listener config-ref="api-httpListenerConfig" path="/agencyregion" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-agencyregion"/>
-	</flow>
-
-	<flow name="balance">
-		<http:listener config-ref="api-httpListenerConfig" path="/balance" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-balance"/>
-	</flow>
-
-	<flow name="contact">
-		<http:listener config-ref="api-httpListenerConfig" path="/contact" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-contact"/>
-	</flow>
-
-	<flow name="contact-load">
-		<http:listener config-ref="api-httpListenerConfig" path="/contact-load" />
-		<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
-			<vm:content ><![CDATA[#[%dw 2.0
-				output application/json
-				---
-				{
-					"offset":0,
-					"batchNumber":0,
-					"totalRecords":0,
-					"startDate": now(),
-					"apiResponseHistory":[
-						],
-					"lastApiInputPayload":{}
-				}]]]></vm:content>
-		</vm:publish>
-		<vm:consume queueName="vm-contact-response" doc:name="Consume" config-ref="VM_Config" timeout="60" timeoutUnit="MINUTES"/>
+	<flow name="get:\watermark\(view):api-config">
+		<flow-ref name="endpoint-watermark-get"/>
 	</flow>
 
-	<flow name="disbursement">
-		<http:listener config-ref="api-httpListenerConfig" path="/disbursement" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-disbursement"/>
+	<flow name="post:\watermark:application\json:api-config"> 
+		<flow-ref name="endpoint-watermark-post"/>
 	</flow>
 
-	<flow name="phone">
-		<http:listener config-ref="api-httpListenerConfig" path="/phone" />
-		<flow-ref  name="initialize"/>
-		<flow-ref  name="view-phone"/>
+	<flow name="get:\etl:api-config"> 
+		<flow-ref name="endpoint-etl"/>
 	</flow>
 
-	<flow name="watermark">
-		<http:listener config-ref="api-httpListenerConfig" path="/watermark/{view}" />
-		<flow-ref  name="watermark-mgmt"/>
+	<flow name="get:\etl\(view)\execute:api-config">
+		<flow-ref name="endpoint-etl-view"/>
 	</flow>
 
-	<flow name="watermark-api-update">
-		<http:listener config-ref="api-httpListenerConfig" path="/watermark/" />
-		<flow-ref  name="watermark-mgmt-post"/>
+	<flow name="get:\etl\(view)\status:api-config">
+		<flow-ref name="endpoint-etl-status"/>
 	</flow>
-
 </mule>

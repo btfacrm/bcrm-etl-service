@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule 
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" 
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" 
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" 
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+		http://www.mulesoft.org/schema/mule/http
+		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+		http://www.mulesoft.org/schema/mule/vm
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/cloudhub 
+		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+
+	<flow name="endpoint-etl-status">
+		<set-variable doc:name="get view to process" variableName="view" value="#[attributes.uriParams.view]" />
+
+		<os:retrieve key="#[vars.view]" objectStore="Object_store" target="etlMemoryStatus">
+			<os:default-value>#[""]</os:default-value>
+		</os:retrieve>
+
+		<!-- <logger doc:name="view" level="INFO" category="app" message="#[vars.etlMemoryStatus]"/> -->
+
+		<choice doc:name="service still processing?" >
+            <when expression='#[ isEmpty(vars.etlMemoryStatus) ]'>
+
+				<!-- There is no meesage in the object store, then retrieve status from Watermark-->
+				<flow-ref name="endpoint-watermark-get"/>
+
+				<ee:transform doc:name="response from watermark" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json
+							---
+							{
+								status: 200,
+								message: "The ETL process finished, getting response from watermark",
+								etlStatus: if ( !isEmpty(payload) ) payload.watermark.apiResponse else {}
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>		
+			</when>
+			<otherwise>
+				<ee:transform doc:name="response still processing" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json
+							---
+							{
+								status: 200,
+								message: "The service is still processing",
+								etlStatus: vars.etlMemoryStatus
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>		
+			</otherwise>
+		</choice>
+	</flow>
+	
+</mule>

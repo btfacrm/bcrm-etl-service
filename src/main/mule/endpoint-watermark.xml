@@ -20,10 +20,9 @@
 		http://www.mulesoft.org/schema/mule/tls
 		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
 	
-    <sub-flow name="watermark-mgmt">
+    <sub-flow name="endpoint-watermark-get">
+		<set-variable doc:name="get view to process" variableName="view" value="#[attributes.uriParams.view]" />
 
-		<set-variable doc:name="connection db" variableName="view" value="#[attributes.uriParams.view]" />
-		
 		<ee:transform doc:name="query watermark" >
 			<ee:variables >
 				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
@@ -33,7 +32,6 @@
 					"		 Retries, " ++
 					"		 LastErrorResponse, " ++
 					"        ApiResponse, " ++
-					"        ApiInputPayload, " ++
 					"		 FORMAT(LastExecution, 'yyyy-MM-dd HH:mm:ss.fff') AS LastExecution, " ++
 					"		 FORMAT(LastErrorDate, 'yyyy-MM-dd HH:mm:ss.fff') AS LastErrorDate " ++
                     " FROM BCMS_WaterMark " ++ 
@@ -43,8 +41,7 @@
 			</ee:variables>
 		</ee:transform>
 
-		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Watermark" />
-        <flow-ref name="mssql-query"/>
+        <flow-ref name="mssql-watermark-query"/>
 		<!-- <logger doc:name="response" level="INFO" message='#[output application/json - payload]' /> -->
 
 		<choice doc:name="verify not empty payload" >
@@ -56,14 +53,16 @@
 							---
 							{
 								status: 200,
+								message: "Watermark data succesfully read from database",
 								correlationId: correlationId,
-								view: payload[0].ViewName,
-								retries: payload[0].Retries,
-								lastExecution: payload[0].LastExecution,
-								lastErrorDate: payload[0].LastErrorDate,
-								(lastErrorResponse: read(payload[0].LastErrorResponse,"application/json")) if (!isEmpty(payload[0].LastErrorResponse)) ,
-								(apiResponse: read(payload[0].ApiResponse,"application/json")) if (!isEmpty(payload[0].ApiResponse)) ,
-								(apiInputPyaload: read(payload[0].ApiInputPayload,"application/json")) if (!isEmpty(payload[0].ApiInputPayload))
+								watermark:{
+									view: payload[0].ViewName,
+									retries: payload[0].Retries,
+									lastExecution: payload[0].LastExecution,
+									lastErrorDate: payload[0].LastErrorDate,
+									(lastErrorResponse: read(payload[0].LastErrorResponse,"application/json")) if (!isEmpty(payload[0].LastErrorResponse)) ,
+									(apiResponse: read(payload[0].ApiResponse,"application/json")) if (!isEmpty(payload[0].ApiResponse))
+								}
 							}
 							]]>
 						</ee:set-payload>
@@ -76,11 +75,11 @@
 		</choice>
     </sub-flow>
 
-	<sub-flow name="watermark-mgmt-post">
+	<sub-flow name="endpoint-watermark-post">
 
 		<set-variable doc:name="lastExecution" variableName="lastExecution" value="#[payload.lastExecution as DateTime]" />
 		<set-variable doc:name="view" variableName="view" value="#[payload.view]" />
-        <logger doc:name="lastExecution" level="INFO" category="app" message="#['lastExecution: ' ++ vars.lastExecution]"/>
+        <!-- <logger doc:name="lastExecution" level="INFO" category="app" message="#['lastExecution: ' ++ vars.lastExecution]"/> -->
 
 		<ee:transform doc:name="update watermark" >
 			<ee:variables >
@@ -95,7 +94,7 @@
 			</ee:variables>
 		</ee:transform>
 
-        <flow-ref name="mssql-update"/>
+        <flow-ref name="mssql-watermark-update"/>
 
 		<ee:transform doc:name="response" >
 			<ee:message>
@@ -104,6 +103,7 @@
 					---
 					{
 						status: 200,
+						message: "Watermark was updated sucessfully",
 						correlationId: correlationId,
 						view: vars.view
 					}

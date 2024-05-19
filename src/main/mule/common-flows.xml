@@ -1,13 +1,12 @@
 <mule
+    xmlns:os="http://www.mulesoft.org/schema/mule/os"
     xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
-    xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
- 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
-    xmlns:http="http://www.mulesoft.org/schema/mule/http"
+    xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/ee/core 
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 		http://www.mulesoft.org/schema/mule/core 
@@ -16,112 +15,11 @@
         http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 		http://www.mulesoft.org/schema/mule/db 
 		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-		http://www.mulesoft.org/schema/mule/tls
-		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
         http://www.mulesoft.org/schema/mule/vm 
-		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	
-
-	<!-- ********************************************* --> 
-	<!-- Database operations -->
-	<!-- ********************************************* --> 
-
-    <sub-flow name="watermark-update">
-        <logger doc:name="sql update" level="INFO" category="app" message="#['Update sql: ' ++ vars.query]"/>
-
-		<db:update doc:name="sqlserver update" config-ref="Database_Config_Watermark">
-            <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{ 
-				validFrom: vars.validFrom,
-				lastErrorResponse: vars.lastErrorResponse,
-				lastExecution: vars.lastExecution,
-				apiResponse: write(vars.batchResponse, "application/json") 
-            }]]]></db:input-parameters>
-		</db:update>
-	</sub-flow>
-
-	<sub-flow name="mssql-query-watermark">
-        <logger doc:name="sql query" level="INFO" category="app" message="#['watermark db query: ' ++ vars.query]"/>
-
-        <db:select doc:name="database watermark" config-ref="Database_Config_Watermark">
-            <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
-            <db:input-parameters ><![CDATA[#[{ 
-                validFrom: vars.validFrom
-            }]]]>
-            </db:input-parameters>
-        </db:select>
-
-		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload)) sizeOf(payload) else 0]'  />
-		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
-		<logger doc:name="num records" level="INFO" category="app" message="#['Records from database: ' ++ (vars.recordsProcessed as String) ]"/>
-	</sub-flow>
-
-	<sub-flow name="mssql-query-main">
-        <logger doc:name="sql query" level="INFO" category="app" message="#['main db query: ' ++ vars.query]"/>
-		<logger level="INFO" category="app" message="#['validFrom: ' ++ vars.validFrom]" />
-
-		<db:select doc:name="database main" config-ref="Database_Config_Main">
-			<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{ 
-				validFrom: vars.validFrom
-            }]]]>
-			</db:input-parameters>
-		</db:select>
-		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload)) sizeOf(payload) else 0]'  />
-		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
-		<logger doc:name="num records" level="INFO" category="app" message="#['Records from database: ' ++ (vars.recordsProcessed as String) ]"/>
-        
-        <!-- if the response from database is empty then an error is raised when finish the execution of the flow/queue. 
-            Just by publishing a message to queue is not sufficient to set the payload. The payload must be
-            initialized with an empty value
-        -->
-        <choice doc:name="initialize payload?" >
-            <when expression='#[ vars.recordsProcessed == 0 ]'>
-                <set-payload doc:name="initialize payload to avoid error" value="#[{}]"/>
-                <set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
-            </when>
-        </choice>
-	</sub-flow>
-
-	<!-- ********************************************* --> 
-	<!-- HTTP request utilities                        -->
-	<!-- ********************************************* --> 
-
-	<flow name="call-api">
-		<logger doc:name="call POST" level="INFO" category="app" 
-			message='#[ "Call POST method, path: " ++ vars.servicePath ++ ", statusValidator: " ++ (vars.statusValidator as String) ]' />
-
-		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
-		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[payload]'  />
-
-		<http:request config-ref="HTTP_Request_Configuration" 
-			method="POST" path="#[vars.servicePath]" responseTimeout="#[1800000]" sendCorrelationId="ALWAYS">
-			<http:headers><![CDATA[#[output application/java ---
-				{
-					"Content-Type"  : "application/json",
-                    "client_id"     : "${service.clientid}",
-                    "client_secret" : "${service.clientsecret}"
-				}]]]>
-			</http:headers>
-			<http:response-validator>
-				<http:success-status-code-validator values="#[vars.statusValidator]" />
-			</http:response-validator>
-		</http:request>
-		<logger doc:name="response" level="INFO" message='#[payload]' />
-		<logger doc:name="status code" level="INFO" message='#["Http status code: " ++ (attributes.statusCode as String)]' />
-		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
-		<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[payload]'/>
-
-		<error-handler>
-			<on-error-continue enableNotifications="false" logException="false">
-				<logger level="INFO" category="app" message="There was an error while calling the service through the POST method" />
-				<logger level="INFO" category="app" message="#[error.errorMessage.payload]" />
-				<logger level="INFO" category="app" message="#[error.errorMessage]" />
-				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[error.errorMessage.attributes.statusCode]'  />
-				<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[error.errorMessage.payload]'/>
-			</on-error-continue>
-		</error-handler>
-	</flow>
 
     <!-- ********************************************* --> 
 	<!-- Business flows                                -->
@@ -144,10 +42,10 @@
 			</ee:variables>
 		</ee:transform>
 
-        <flow-ref name="mssql-query-watermark"/>
+        <flow-ref name="mssql-watermark-query"/>
 
 		<set-variable doc:name="set validFrom" variableName="validFrom" value="#[payload[0].LastExecution as String]" />
-		<logger level="INFO" category="app" message="#['validFrom: ' ++ vars.validFrom]" />
+		<logger level="INFO" category="app" message="#['Watermark validFrom: ' ++ vars.validFrom]" />
     </sub-flow>
 
 	<sub-flow name="update-watermark-results">
@@ -194,32 +92,36 @@
 			</otherwise>
         </choice>     
 
-        <flow-ref name="watermark-update"/>
+        <flow-ref name="mssql-watermark-update"/>
 	</sub-flow>
 
     <sub-flow name="publish-message">
+		<flow-ref name="save-status-step6" doc:name="save batch status 6"/>
+
         <choice doc:name="determine how to route the flow" >
-            <when expression='#[ vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200]'>
+            <when expression='#[vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200]'>
 				<logger doc:name="payload" level="INFO" category="app" message="#['Trigger a new batch process to find more records']"/>
-				<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
+				<vm:publish queueName="#[vars.serviceQueue]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
 					<vm:content ><![CDATA[#[%dw 2.0
 						output application/json
 						---
 						{
-							"startDate": vars.startDate,
-							"batchNumber": vars.batchNumber,
-							"offset": vars.offset + vars.maxRecords,
-							"totalRecords": vars.totalRecords + vars.maxRecords,
-							"apiResponseHistory": vars.apiResponseHistory +
+							view: vars.view,
+							correlationId: correlationId,
+							expectedRecords: vars.expectedRecords,
+							startDate: vars.startDate,
+							batchNumber: vars.batchNumber,
+							offset: vars.offset + vars.maxRecords,
+							totalRecords: vars.totalRecords + vars.maxRecords,
+							apiResponseHistory: vars.apiResponseHistory +
 								{	
-									"batchNumber" : vars.batchNumber,
-									"offset": vars.offset, 
-                                    "apiStatus" : vars.httpStatus,
-									"apiResponse" : vars.httpMessage
+									batchNumber : vars.batchNumber,
+									offset: vars.offset, 
+                                    apiStatus : vars.httpStatus,
+									apiResponse : vars.httpMessage
 								},
-							"lastApiInputPayload":{}
-						}
-					]]]></vm:content>
+							lastApiInputPayload:{}
+						}]]]></vm:content>
 				</vm:publish>				
             </when>
             <otherwise>
@@ -253,7 +155,8 @@
                                 "updateWatermarkDate": if (vars.httpStatus == 200)
                                                             vars.lastExecution
                                                     else
-                                                            "On error the value is not updated"
+                                                            "On error the value is not updated",
+								"expectedRecords": vars.expectedRecords
                             } ++
                             if (vars.recordsProcessed > 0 )
                                 {
@@ -281,7 +184,9 @@
 
 				<flow-ref name="update-watermark-results"/>
 
-				<vm:publish queueName="vm-contact-response" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
+				<os:remove doc:name="Remove" key="#[vars.view]" objectStore="Object_store"/>
+
+				<vm:publish queueName="#[vars.serviceQueueResponse]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
                     <vm:content><![CDATA[#[%dw 2.0
 						output application/json
 						---
@@ -293,20 +198,34 @@
 	</sub-flow>
 
     <sub-flow name="initialize-process">
-
-        <logger level="INFO" category="app" message="#['Executing process for view: ' ++ vars.view]" />
+		<set-variable doc:name="get view to process" variableName="view" value="#[payload.view]" />
+        <logger level="INFO" category="app" message="#['Executing queue process for view: ' ++ vars.view ++ ', initializing variables']" />
 
         <!-- Extract batch metadata -->
 		<logger doc:name="payload" level="INFO" category="app" message="#[payload]"/>
+		<set-variable doc:name="save queueMesssage" variableName="queueMessage" value='#[payload]' />
 		<set-variable doc:name="set offset" variableName="offset" value='#[payload.offset as Number]' />
 		<set-variable doc:name="set batchNumber" variableName="batchNumber" value='#[payload.batchNumber as Number + 1]' />
 		<set-variable doc:name="set totalRecords" variableName="totalRecords" value='#[payload.totalRecords as Number]' />
 		<set-variable doc:name="set apiResponseHistory" variableName="apiResponseHistory" value='#[payload.apiResponseHistory]' />
 		<set-variable doc:name="set startDate" variableName="startDate" value='#[payload.startDate as DateTime]' />
+		<set-variable doc:name="set expectedRecords" variableName="expectedRecords" value="#[payload.expectedRecords]" />
 		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[${maxrecords}]" />
+
+		<choice doc:name="create API payload?" >
+            <when expression='#[ vars.view == "contact" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.contact}" />
+				<set-variable doc:name="set serviceQueueResponse" variableName="serviceQueueResponse" value="vm-contact-response" />
+				<set-variable doc:name="set serviceQueue" variableName="serviceQueue" value="vm-contact" />
+			</when>
+			<otherwise>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="this-path-is-not-correct" />
+			</otherwise>
+		</choice>
 
         <!-- The expected result from the salesforce API-->
         <set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
-    </sub-flow>
+		<flow-ref name="save-status-step2" doc:name="save batch status 2"/>
 
+    </sub-flow>
 </mule>

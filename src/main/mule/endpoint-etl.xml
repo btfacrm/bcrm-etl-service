@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule 
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" 
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" 
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" 
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+		http://www.mulesoft.org/schema/mule/http
+		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+		http://www.mulesoft.org/schema/mule/vm
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/mule-apikit 
+		http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  
+		http://www.mulesoft.org/schema/mule/cloudhub 
+		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+
+	<flow name="endpoint-etl"> 
+		<cloudhub:create-notification doc:name="Create Notification" config-ref="CloudHub_Config" 
+			domain="${notification.domain}" transactionId="#[correlationId]" priority="${notification.priority}">
+			<cloudhub:message><![CDATA[#["${notification.message.mainetl}"]]]></cloudhub:message>
+			<cloudhub:custom-properties><![CDATA[#[output application/java
+				---
+				{
+					correlationId: correlationId,
+					date: now()
+				}]]]>
+			</cloudhub:custom-properties>
+		</cloudhub:create-notification>
+
+		<ee:transform doc:name="response from watermark" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+					output application/json
+					---
+					{
+						status: 200,
+						message: "The orchestrator ETL run sucessfully",
+						correlationId: correlationId
+					}
+					]]>
+				</ee:set-payload>
+			</ee:message>
+		</ee:transform>		
+	</flow>
+
+	<flow name="endpoint-etl-view">
+		<set-variable doc:name="get view to process" variableName="view" value="#[attributes.uriParams.view]" />
+		<set-variable doc:name="set isProcessTriggered" variableName="isProcessTriggered" value="#[true]" />
+		<logger doc:name="view" level="INFO" category="app" message="#['Request execute ETL for : ' ++ vars.view]"/>
+
+		<choice doc:name="verify if view is valid" >
+            <when expression='#[ ["contact","account"] contains vars.view ]'>
+
+				<os:retrieve key="#[vars.view]" objectStore="Object_store" target="etlMemoryStatus">
+					<os:default-value>#[""]</os:default-value>
+				</os:retrieve>
+
+				<choice doc:name="is the etl process running ?" >
+            		<when expression='#[ isEmpty(vars.etlMemoryStatus) ]'>
+
+						<!-- Start the ETL process, create the message for the queue-->
+
+						<ee:transform doc:name="queue message" >
+							<ee:variables >
+								<ee:set-variable variableName="queueMessage"><![CDATA[#[ %dw 2.0
+									output application/json
+									---
+									{
+										view: vars.view,
+										correlationId: correlationId,
+										expectedRecords: 0,
+										offset: 0,
+										batchNumber: 0,
+										totalRecords: 0,
+										startDate: now(),
+										apiResponseHistory:[
+											],
+										lastApiInputPayload:{}
+									}
+									]]]>
+								</ee:set-variable>
+							</ee:variables>
+						</ee:transform>	
+
+						<flow-ref name="save-status-step1" doc:name="save batch status 1"/>
+
+						<vm:publish queueName="vm-contact" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
+							<vm:content ><![CDATA[#[%dw 2.0
+								output application/json
+								---
+								vars.queueMessage
+							]]]></vm:content>
+						</vm:publish>
+
+						<ee:transform doc:name="http response" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+									output application/json
+									---
+									{
+										status: 200,
+										message: "Service started successfully",
+										view: vars.view,
+										currentBatchMetadata: vars.queueMessage
+									}
+									]]>
+								</ee:set-payload>
+							</ee:message>
+						</ee:transform>						
+
+					</when>
+					<otherwise>
+
+						<ee:transform doc:name="Must not run two ETL instances" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+									output application/json
+									---
+									{
+										status: 419,
+										message: "The service is still processing, can not have more than once instance running",
+										view: vars.view,
+										etlStatus: vars.etlMemoryStatus
+									}
+									]]>
+								</ee:set-payload>
+							</ee:message>
+						</ee:transform>		
+					</otherwise>
+				</choice>
+
+			</when>
+			<otherwise>
+				<ee:transform doc:name="http response" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json
+							---
+							{
+								status: 404,
+								message: "Incorrect view",
+								view: vars.view
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+
+	</flow>
+</mule>

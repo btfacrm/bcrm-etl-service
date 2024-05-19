@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <mule
 	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
 	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
@@ -7,14 +6,19 @@
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" 
 	xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/api-gateway 
 		http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd 
 		http://www.mulesoft.org/schema/mule/validation 
 		http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd  
+		http://www.mulesoft.org/schema/mule/mule-apikit 
+		http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  
 		http://www.mulesoft.org/schema/mule/http 
 		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 		http://www.mulesoft.org/schema/mule/db 
@@ -24,12 +28,28 @@
 		http://www.mulesoft.org/schema/mule/core 
 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/vm
-		 http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/cloudhub 
+		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
 ">
 	<configuration-properties file="config.yaml" />
 	<validation:config name="Validation_Config" />
 	<import file="global-configuration-tls.xml" />
 	<import file="global-error.xml" />	
+
+	<apikit:config
+		name="api-config"
+		api="${api.spec}"
+		outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+
+	<api-gateway:autodiscovery
+		apiId="${api.id}"
+		ignoreBasePath="true"
+		doc:name="API Autodiscovery"
+		flowRef="api-main" />	
 
 	<!-- 1 hour timeout for the http connection -->
 	<http:listener-config name="api-httpListenerConfig" >
@@ -90,5 +110,16 @@
 			<vm:queue queueName="vm-account-response" />
 		</vm:queues>
 	</vm:config>
+
+	<os:object-store name="Object_store" doc:name="Object store" 
+		persistent="false" maxEntries="20" />
+
+	<cloudhub:config name="CloudHub_Config" doc:name="CloudHub Config">
+		<cloudhub:oauth-client-credentials-connection
+			clientId="${notification.clientid}"
+			clientSecret="${notification.clientsecret}" 
+			environment="${notification.env}" 
+			anypointPlatformUrl="${notification.platform}"/>
+	</cloudhub:config>
 
 </mule>
