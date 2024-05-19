@@ -35,6 +35,9 @@
         <AsyncLogger name="org.bouncycastle.jsse.provider.ProvTlsClient" level="WARN"/>
         <AsyncLogger name="org.bouncycastle" level="WARN"/>
 
+        <!-- Remove message in CloudHub Found string system property [jdk.tls.client.protocols]: TLSv1,TLSv1.1,TLSv1.2,TLSv1.3 -->
+        <AsyncLogger name="jdk.tls" level="WARN"/>
+
         <AsyncRoot level="INFO">
             <AppenderRef ref="file"/>
         </AsyncRoot>

@@ -30,9 +30,10 @@
             <when expression='#[ vars.batchNumber == 1 ]'>
 				<flow-ref name="save-status-step3" doc:name="save batch status 3"/>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from VCrm_ContactMaster WHERE ValidFrom > :validFrom" ]' />
+					value='#["SELECT count(DISTINCT ContactID) total from VCrm_ContactMaster WHERE ValidFrom > :validFrom" ]' />
 				<flow-ref name="mssql-main-query" doc:name="query main db"/>
 				<set-variable doc:name="query expected records" variableName="expectedRecords" value="#[payload[0].total]"/>
+				<logger doc:name="expected records" level="INFO" category="app" message="#['Expected records to process: ' ++ ]"/>
 			</when>
 		</choice>
 
@@ -45,7 +46,7 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT " ++
+							" SELECT DISTINCT " ++
 							"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
 							"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
 							"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
