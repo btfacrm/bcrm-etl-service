@@ -33,6 +33,7 @@
         https://issues.salesforce.com/issue/a028c00000yzVOTAA2/additional-logs-showing-up-for-govcloud-deployments-on-march-2023-patch
         -->
         <AsyncLogger name="org.bouncycastle.jsse.provider.ProvTlsClient" level="WARN"/>
+        <AsyncLogger name="org.bouncycastle" level="WARN"/>
 
         <AsyncRoot level="INFO">
             <AppenderRef ref="file"/>
