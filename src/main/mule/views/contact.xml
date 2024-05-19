@@ -33,7 +33,7 @@
 					value='#["SELECT count(DISTINCT ContactID) total from VCrm_ContactMaster WHERE ValidFrom > :validFrom" ]' />
 				<flow-ref name="mssql-main-query" doc:name="query main db"/>
 				<set-variable doc:name="query expected records" variableName="expectedRecords" value="#[payload[0].total]"/>
-				<logger doc:name="expected records" level="INFO" category="app" message="#['Expected records to process: ' ++ ]"/>
+				<logger doc:name="expected records" level="INFO" category="app" message="#['Expected records to process: ' ++ vars.expectedRecords as String]"/>
 			</when>
 		</choice>
 
