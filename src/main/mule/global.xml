@@ -104,10 +104,14 @@
 
 	<vm:config name="VM_Config" doc:name="VM Config">
 		<vm:queues >
-			<vm:queue queueName="vm-contact" />
-			<vm:queue queueName="vm-contact-response" />
-			<vm:queue queueName="vm-account" />
-			<vm:queue queueName="vm-account-response" />
+			<vm:queue queueName="contact" />
+			<vm:queue queueName="account" />
+			<vm:queue queueName="accountudf" />
+			<vm:queue queueName="balance" />
+			<vm:queue queueName="disbursement" />
+			<vm:queue queueName="agencyregion" />
+			<vm:queue queueName="phone" />
+			<vm:queue queueName="address" />
 		</vm:queues>
 	</vm:config>
 

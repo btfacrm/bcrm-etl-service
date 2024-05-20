@@ -25,6 +25,17 @@
 	<!-- Business flows                                -->
 	<!-- ********************************************* --> 
 
+    <sub-flow name="get-expected-records">
+		<choice doc:name="get expected records?" >
+            <when expression='#[ vars.batchNumber == 1 ]'>
+				<flow-ref name="save-status-step3" doc:name="save batch status 3"/>
+				<flow-ref name="mssql-main-query" doc:name="query main db"/>
+				<set-variable doc:name="query expected records" variableName="expectedRecords" value="#[payload[0].total]"/>
+				<logger doc:name="expected records" level="INFO" category="app" message="#['Expected records to process: ' ++ vars.expectedRecords as String]"/>
+			</when>
+		</choice>
+    </sub-flow>
+
     <sub-flow name="query-watermark-validfrom">
 
 		<set-variable doc:name="connection db" variableName="connectionDb" value="Database_Config_Watermark" />
@@ -101,7 +112,7 @@
         <choice doc:name="determine how to route the flow" >
             <when expression='#[vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200]'>
 				<logger doc:name="payload" level="INFO" category="app" message="#['Trigger a new batch process to find more records']"/>
-				<vm:publish queueName="#[vars.serviceQueue]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
+				<vm:publish queueName="#[vars.view]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
 					<vm:content ><![CDATA[#[%dw 2.0
 						output application/json
 						---
@@ -185,14 +196,6 @@
 				<flow-ref name="update-watermark-results"/>
 
 				<os:remove doc:name="Remove" key="#[vars.view]" objectStore="Object_store"/>
-
-				<vm:publish queueName="#[vars.serviceQueueResponse]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
-                    <vm:content><![CDATA[#[%dw 2.0
-						output application/json
-						---
-						vars.batchResponse
-					]]]></vm:content>
-                </vm:publish>   
             </otherwise>
         </choice>
 	</sub-flow>
@@ -215,9 +218,28 @@
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.view == "contact" ]'>
 				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.contact}" />
-				<set-variable doc:name="set serviceQueueResponse" variableName="serviceQueueResponse" value="vm-contact-response" />
-				<set-variable doc:name="set serviceQueue" variableName="serviceQueue" value="vm-contact" />
 			</when>
+            <when expression='#[ vars.view == "account" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.account}" />
+			</when>
+            <when expression='#[ vars.view == "accountudf" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.accountudf}" />
+			</when>
+            <when expression='#[ vars.view == "balance" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.balance}" />
+			</when>
+			<when expression='#[ vars.view == "disbursement" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.disbursement}" />
+			</when>
+            <when expression='#[ vars.view == "agencyregion" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.agencyregion}" />
+			</when>			
+			<when expression='#[ vars.view == "phone" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.phone}" />
+			</when>
+            <when expression='#[ vars.view == "address" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.address}" />
+			</when>	
 			<otherwise>
 				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="this-path-is-not-correct" />
 			</otherwise>
