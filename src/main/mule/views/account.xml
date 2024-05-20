@@ -41,9 +41,19 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   CustomerAccountNumber, OwnerContactID, AccountTierLevelNum, AccountTierLevelDesc, FreezeCode, FreezeDesc, " ++
-							"   AccountTypeCode, AccountTypeDescription, AccountCategoryCode, AccountCategoryDescription, AdminOfficerContactID, " ++
-							"   AdministratorName, ActiveFlag, ClosedFlag, CustomerDescriptionLine1, CustomerDescriptionLine2, CustomerDescriptionLine3, CustomerDescriptionLine4, StatementVsValidFrom_difference, " ++
+							"   CustomerAccountNumber, OwnerContactID, " ++
+							"   AccountTierLevelNum, AccountTierLevelDesc, " ++
+							"   RTRIM(FreezeCode) as FreezeCode, " ++
+							"   RTRIM(FreezeDesc) AS FreezeDesc, " ++
+							"   AccountTypeCode, AccountTypeDescription, " ++
+							"   AccountCategoryCode, AccountCategoryDescription, " ++
+							"   AdminOfficerContactID, AdministratorName, " ++
+							"   ActiveFlag, ClosedFlag, " ++
+							"   RTRIM(CustomerDescriptionLine1) as CustomerDescriptionLine1, " ++
+							"   RTRIM(CustomerDescriptionLine2) as CustomerDescriptionLine2, " ++
+							"   RTRIM(CustomerDescriptionLine3) as CustomerDescriptionLine3, " ++
+							"   RTRIM(CustomerDescriptionLine4) as CustomerDescriptionLine4, " ++
+							"   StatementVsValidFrom_difference, " ++
 							"   FORMAT(DateOpened, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS DateOpened, " ++
 							"   FORMAT(ClosedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ClosedDate, " ++
 							"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime, " ++
@@ -79,28 +89,28 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			   trim(item.CustomerAccountNumber),
-								contactId: 			   trim(item.OwnerContactID as String),
-								tierLevelCode: 		   trim(item.AccountTierLevelNum),
-								tierLevelDescription:  trim(item.AccountTierLevelDesc),
-								freezeCode: 		   trim(item.FreezeCode),
-								freezeDescription: 	   trim(item.FreezeDesc),
-								typeCode: 			   trim(item.AccountTypeCode),
-								typeDescription: 	   trim(item.AccountTypeDescription),
-								categoryCode: 		   trim(item.AccountCategoryCode),
-								categoryDescription:   trim(item.AccountCategoryDescription),
-								adminOfficerId: 	   trim(item.AdminOfficerContactID) as String,
-								adminOfficerName: 	   trim(item.AdministratorName),
-								activeFlag: 		   if (item.ActiveFlag != 0) true else false,
-								openedDate: 		   trim(item.DateOpened),
-								closedDate: 		   trim(item.ClosedDate),
-								closedFlag: 		   if (item.ClosedFlag != 0) true else false,
-								line1: 				   trim(item.CustomerDescriptionLine1),
-								line2: 				   trim(item.CustomerDescriptionLine2),
-								line3: 				   trim(item.CustomerDescriptionLine3),
-								line4: 				   trim(item.CustomerDescriptionLine4),
-								date: 				   trim(item.ValidFrom),
-								statementDate: 		   trim(item.StatementDateTime)
+								account: 			  trim(item.CustomerAccountNumber),
+								contactId: 			  item.OwnerContactID as String,
+								(tierLevelCode: 	  item.AccountTierLevelNum as String) if (!isEmpty(item.AccountTierLevelNum)),
+								(tierLevelDescription: trim(item.AccountTierLevelDesc)) if (!isEmpty(item.AccountTierLevelDesc)),
+								(freezeCode: 		  trim(item.FreezeCode)) if (!isEmpty(item.FreezeCode)),
+								(freezeDescription:   trim(item.FreezeDesc)) if (!isEmpty(item.FreezeDesc)),
+								typeCode: 			  trim(item.AccountTypeCode),
+								typeDescription: 	  trim(item.AccountTypeDescription),
+								categoryCode: 		  trim(item.AccountCategoryCode),
+								categoryDescription:  trim(item.AccountCategoryDescription),
+								adminOfficerId: 	  trim(item.AdminOfficerContactID) as String,
+								adminOfficerName: 	  trim(item.AdministratorName),
+								activeFlag: 		  if (item.ActiveFlag != 0) true else false,
+								openedDate: 		  item.DateOpened,
+								(closedDate: 		  item.ClosedDate) if (!isEmpty(item.ClosedDate)),
+								closedFlag: 		  if (item.ClosedFlag != 0) true else false,
+								(line1: 			  trim(item.CustomerDescriptionLine1)) if (!isEmpty(item.CustomerDescriptionLine1)),
+								(line2: 			  trim(item.CustomerDescriptionLine2)) if (!isEmpty(item.CustomerDescriptionLine2)),
+								(line3: 			  trim(item.CustomerDescriptionLine3)) if (!isEmpty(item.CustomerDescriptionLine3)),
+								(line4: 			  trim(item.CustomerDescriptionLine4)) if (!isEmpty(item.CustomerDescriptionLine4)),
+								date: 				  item.ValidFrom,
+								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime))
 							}
 							]]>
 						</ee:set-payload>
