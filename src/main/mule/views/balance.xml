@@ -18,25 +18,16 @@
 		http://www.mulesoft.org/schema/mule/vm 
 		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	
-	<flow name="queue-contact">
-		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="contact" timeout="60" timeoutUnit="MINUTES"/>
+	<flow name="queue-balance">
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="balance" timeout="60" timeoutUnit="MINUTES"/>
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
 
 		<!-- Get validFrom Watermark -->
 		<flow-ref name="query-watermark-validfrom" doc:name="get watermark data"/>
 
 		<!-- Get the expected the number of records to process for all batches, triggered only in first batch  -->
-		<choice doc:name="custom watermark dates?" >
-            <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
-				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(DISTINCT ContactID) total from VCrm_ContactMaster WHERE ValidFrom > :validFrom" ]' />
-			</when>
-			<otherwise>
-				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(DISTINCT ContactID) total from VCrm_ContactMaster WHERE ValidFrom between :start and :end' ]" />
-			</otherwise>
-		</choice>
-
+		<set-variable doc:name="query expected records" variableName="query" 
+					  value='#["SELECT count(*) total from VCrm_CashBalance_Book WHERE BalanceValidFrom > :validFrom" ]' />
 		<flow-ref name="get-expected-records" doc:name="get expected records to process"/>
 
 		<choice doc:name="query view?" >
@@ -48,18 +39,12 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT DISTINCT " ++
-							"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
-							"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
-							"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
-							"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
-							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-							" FROM VCrm_ContactMaster  " ++
-							" WHERE " ++
-								if (isEmpty(vars.customWatermarkStart))
-									" ValidFrom > :validFrom "
-								else " ValidFrom between :start and :end " ++
-							" ORDER BY ValidFrom " ++
+							" SELECT " ++
+							"   CustomerAccountNumber, EndingAccountBalance, " ++
+							"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
+							" FROM VCrm_CashBalance_Book  " ++
+							" WHERE BalanceValidFrom > :validFrom " ++
+							" ORDER BY BalanceValidFrom " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
@@ -88,19 +73,9 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								contactId: 		 item.ContactID as String,
-								(firstName: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
-								(lastName: 		 item.PrimaryLastName) if (!isEmpty(item.PrimaryLastName)),
-								(middleInitial:  item.PrimaryMiddleInitial) if (!isEmpty(item.PrimaryMiddleInitial)),
-								name: 			 item.ContactName,
-								(gender: 		 item.PrimaryGender) if (!isEmpty(item.PrimaryGender)),
-								(ssn: 			 item.SSN) if (!isEmpty(item.SSN)),
-								ssnFlag: 		 !isEmpty(item.SSNFlag) and item.SSNFlag != 0,
-								(dob: 			 item.DateOfBirth) if (!isEmpty(item.DateOfBirth)),
-								(dod: 			 item.DateOfDeath) if (!isEmpty(item.DateOfDeath)),
-								activeFlag: 	 !isEmpty(item.ActiveFlag) and item.ActiveFlag != 0,
-								disbursementFlag:!isEmpty(item.DisbursementEligibilityFlag) and item.DisbursementEligibilityFlag != 0,
-								date: 			 item.ValidFrom
+								account: 	trim(item.CustomerAccountNumber as String),
+								balance: 	item.EndingAccountBalance as Number,
+								date: 		item.BalanceValidFrom
 							}
 							]]>
 						</ee:set-payload>

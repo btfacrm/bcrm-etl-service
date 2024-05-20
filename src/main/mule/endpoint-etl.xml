@@ -56,8 +56,12 @@
 
 	<flow name="endpoint-etl-view">
 		<set-variable doc:name="get view to process" variableName="view" value="#[attributes.uriParams.view]" />
+		<set-variable doc:name="get watermark start" variableName="customWatermarkStart" value="#[attributes.queryParams.start as DateTime default '']" />
+		<set-variable doc:name="get watermark end" variableName="customWatermarkEnd" value="#[attributes.queryParams.end as DateTime default '' ]" />
+		
 		<set-variable doc:name="set isProcessTriggered" variableName="isProcessTriggered" value="#[true]" />
-		<logger doc:name="view" level="INFO" category="app" message="#['Request execute ETL for : ' ++ vars.view]"/>
+		<logger doc:name="view" level="INFO" category="app" 
+			message="#['Request execute ETL for : ' ++ vars.view ++ ', start: ' ++ vars.customWatermarkStart ++ ', end: ' ++ vars.customWatermarkEnd]"/>
 
 		<choice doc:name="verify if view is valid" >
             <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address"] contains vars.view ]'>
@@ -79,6 +83,8 @@
 									{
 										view: vars.view,
 										correlationId: correlationId,
+										customWatermarkStart: vars.customWatermarkStart,
+										customWatermarkEnd: vars.customWatermarkEnd,
 										expectedRecords: 0,
 										offset: 0,
 										batchNumber: 0,

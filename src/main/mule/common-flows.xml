@@ -110,7 +110,7 @@
 		<flow-ref name="save-status-step6" doc:name="save batch status 6"/>
 
         <choice doc:name="determine how to route the flow" >
-            <when expression='#[vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200]'>
+            <when expression='#[vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200 and isEmpty(vars.customWatermarkStart)]'>
 				<logger doc:name="payload" level="INFO" category="app" message="#['Trigger a new batch process to find more records']"/>
 				<vm:publish queueName="#[vars.view]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
 					<vm:content ><![CDATA[#[%dw 2.0
@@ -163,6 +163,8 @@
                                                     leftPad((processingTime.seconds mod 60 as Number) as String, 2, "0") ++ ":" ++
                                                     leftPad(milliseconds as String, 3, "0"),
                                 "correlationId": correlationId,
+								"customWatermarkStart": vars.customWatermarkStart,
+								"customWatermarkEnd": vars.customWatermarkEnd,								
                                 "updateWatermarkDate": if (vars.httpStatus == 200)
                                                             vars.lastExecution
                                                     else
@@ -214,6 +216,9 @@
 		<set-variable doc:name="set startDate" variableName="startDate" value='#[payload.startDate as DateTime]' />
 		<set-variable doc:name="set expectedRecords" variableName="expectedRecords" value="#[payload.expectedRecords]" />
 		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[${maxrecords}]" />
+		<set-variable doc:name="set customWatermarkStart" variableName="customWatermarkStart" value="#[payload.customWatermarkStart]" />
+		<set-variable doc:name="set customWatermarkEnd" variableName="customWatermarkEnd" value="#[payload.customWatermarkEnd]" />
+		
 
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.view == "contact" ]'>

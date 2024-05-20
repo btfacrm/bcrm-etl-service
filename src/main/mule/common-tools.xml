@@ -59,12 +59,15 @@
 
 	<sub-flow name="mssql-main-query">
         <!-- <logger doc:name="sql query" level="INFO" category="app" message="#['main db query: ' ++ vars.query]"/> -->
-		<logger level="INFO" category="app" message="#['Query main db, validFrom: ' ++ vars.validFrom]" />
+		<logger level="INFO" category="app" 
+			message="#[output application/java --- 'Query main db, validFrom: ' ++ vars.validFrom ++ ', custom start/end: ' ++ if (!isEmpty(vars.customWatermarkStart)) 'true' else 'false']" />
 
 		<db:select doc:name="database main" config-ref="Database_Config_Main">
 			<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{ 
-				validFrom: vars.validFrom
+				validFrom: vars.validFrom,
+				start: vars.customWatermarkStart,
+				end: vars.customWatermarkEnd
             }]]]>
 			</db:input-parameters>
 		</db:select>
