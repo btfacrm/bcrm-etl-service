@@ -26,8 +26,17 @@
 		<flow-ref name="query-watermark-validfrom" doc:name="get watermark data"/>
 
 		<!-- Get the expected the number of records to process for all batches, triggered only in first batch  -->
-		<set-variable doc:name="query expected records" variableName="query" 
+		<choice doc:name="custom watermark dates?" >
+            <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
+				<set-variable doc:name="query expected records" variableName="query" 
 					  value='#["SELECT count(*) total from Vcrm_AccountMaster WHERE ValidFrom > :validFrom" ]' />
+			</when>
+			<otherwise>
+				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
+					value="#['SELECT count(*) total from Vcrm_AccountMaster WHERE ValidFrom between :start and :end' ]" />
+			</otherwise>
+		</choice>
+
 		<flow-ref name="get-expected-records" doc:name="get expected records to process"/>
 
 		<choice doc:name="query view?" >
@@ -59,8 +68,13 @@
 							"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM Vcrm_AccountMaster " ++
-							" WHERE ValidFrom > :validFrom " ++
-							" ORDER BY ValidFrom " ++
+							" WHERE " ++ (
+								if (isEmpty(vars.customWatermarkStart))
+									" ValidFrom > :validFrom "
+								else 
+									" ValidFrom between :start and :end "
+							) ++
+							" ORDER BY ValidFrom, CustomerAccountNumber " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
