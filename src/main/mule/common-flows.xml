@@ -164,7 +164,8 @@
                                                     leftPad(milliseconds as String, 3, "0"),
                                 "correlationId": correlationId,
 								"customWatermarkStart": vars.customWatermarkStart,
-								"customWatermarkEnd": vars.customWatermarkEnd,								
+								"customWatermarkEnd": vars.customWatermarkEnd,
+								"customMaxRecords": vars.customMaxRecords,						
                                 "updateWatermarkDate": if (vars.httpStatus == 200)
                                                             vars.lastExecution
                                                     else
@@ -204,7 +205,6 @@
 
     <sub-flow name="initialize-process">
 		<set-variable doc:name="get view to process" variableName="view" value="#[payload.view]" />
-        <logger level="INFO" category="app" message="#['Executing queue process for view: ' ++ vars.view ++ ', initializing variables']" />
 
         <!-- Extract batch metadata -->
 		<logger doc:name="payload" level="INFO" category="app" message="#[payload]"/>
@@ -215,10 +215,20 @@
 		<set-variable doc:name="set apiResponseHistory" variableName="apiResponseHistory" value='#[payload.apiResponseHistory]' />
 		<set-variable doc:name="set startDate" variableName="startDate" value='#[payload.startDate as DateTime]' />
 		<set-variable doc:name="set expectedRecords" variableName="expectedRecords" value="#[payload.expectedRecords]" />
-		<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[${maxrecords}]" />
 		<set-variable doc:name="set customWatermarkStart" variableName="customWatermarkStart" value="#[payload.customWatermarkStart]" />
 		<set-variable doc:name="set customWatermarkEnd" variableName="customWatermarkEnd" value="#[payload.customWatermarkEnd]" />
-		
+		<set-variable doc:name="set customMaxRecords" variableName="customMaxRecords" value="#[payload.customMaxRecords]" />
+
+		<choice doc:name="query view?" >
+            <when expression='#[ isEmpty(vars.customMaxRecords)]'>
+				<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[${maxrecords}]" />
+			</when>
+			<otherwise>
+				<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[vars.customMaxRecords as Number]" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" category="app" 
+			message="#[output application/java --- 'Executing queue process for view: ' ++ vars.view ++ ', max records x batch: ' ++ vars.maxRecords]" />
 
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.view == "contact" ]'>

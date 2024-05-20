@@ -58,6 +58,8 @@
 		<set-variable doc:name="get view to process" variableName="view" value="#[attributes.uriParams.view]" />
 		<set-variable doc:name="get watermark start" variableName="customWatermarkStart" value="#[attributes.queryParams.start as DateTime default '']" />
 		<set-variable doc:name="get watermark end" variableName="customWatermarkEnd" value="#[attributes.queryParams.end as DateTime default '' ]" />
+		<set-variable doc:name="get MaxRecords" variableName="customMaxRecords" value="#[attributes.queryParams.maxrecords as String default '' ]" />
+
 		
 		<set-variable doc:name="set isProcessTriggered" variableName="isProcessTriggered" value="#[true]" />
 		<logger doc:name="view" level="INFO" category="app" 
@@ -85,6 +87,7 @@
 										correlationId: correlationId,
 										customWatermarkStart: vars.customWatermarkStart,
 										customWatermarkEnd: vars.customWatermarkEnd,
+										customMaxRecords: vars.customMaxRecords,
 										expectedRecords: 0,
 										offset: 0,
 										batchNumber: 0,

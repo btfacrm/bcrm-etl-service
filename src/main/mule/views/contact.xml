@@ -49,17 +49,24 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT DISTINCT " ++
-							"   ContactID, PrimaryLastName, PrimaryFirstName, PrimaryMiddleInitial, ContactName, " ++
-							"   PrimaryGender, SSN, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
+							"   ContactID, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
+							"   RTRIM(PrimaryLastName) as PrimaryLastName, " ++
+							"   RTRIM(PrimaryMiddleInitial) as PrimaryMiddleInitial, " ++
+							"   RTRIM(PrimaryFirstName) as PrimaryFirstName, " ++
+							"   RTRIM(ContactName) as ContactName, " ++				
+							"   RTRIM(SSN) as SSN, " ++
+							"   RTRIM(PrimaryGender) as PrimaryGender, " ++
 							"   FORMAT(DateOfBirth, 'yyyy-MM-dd') AS DateOfBirth, " ++
 							"   FORMAT(DateOfDeath, 'yyyy-MM-dd') AS DateOfDeath, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_ContactMaster  " ++
-							" WHERE " ++
+							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom > :validFrom "
-								else " ValidFrom between :start and :end " ++
-							" ORDER BY ValidFrom " ++
+								else 
+									" ValidFrom between :start and :end "
+							) ++
+							" ORDER BY ValidFrom, ContactID " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
