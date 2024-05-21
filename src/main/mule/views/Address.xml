@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+ 	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"  
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd	
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/http 
+		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+		http://www.mulesoft.org/schema/mule/vm 
+		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	
+	<flow name="queue-address">
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="address" timeout="60" timeoutUnit="MINUTES"/>
+		<flow-ref name="initialize-process" doc:name="initialize process"/>
+
+		<!-- Get validFrom Watermark -->
+		<flow-ref name="query-watermark-validfrom" doc:name="get watermark data"/>
+
+		<!-- Get the expected the number of records to process for all batches, triggered only in first batch  -->
+		<choice doc:name="custom watermark dates?" >
+            <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
+				<set-variable doc:name="query expected records" variableName="query" 
+					  value='#["SELECT count(*) total from VCrm_Addresses WHERE ValidFrom > :validFrom" ]' />
+			</when>
+			<otherwise>
+				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
+					value="#['SELECT count(*) total from VCrm_Addresses WHERE ValidFrom between :start and :end' ]" />
+			</otherwise>
+		</choice>
+
+		<flow-ref name="get-expected-records" doc:name="get expected records to process"/>
+
+		<choice doc:name="query view?" >
+            <when expression='#[ vars.expectedRecords > 0 ]'>
+
+				<!-- Create query for view -->
+				<flow-ref name="save-status-step4" doc:name="save batch status 4"/>
+				<ee:transform doc:name="sql for view" >
+					<ee:variables >
+						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+							output application/json skipNullOn="everywhere"
+							---
+							" SELECT top " ++ vars.maxRecords as String ++
+							"   INNO_ID, ContactID, AddressType, Address1, Address2, Address3, " ++
+							"   City, State, ZipCode, CountryCode, primaryaddressflag, " ++
+							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+							" FROM VCrm_Addresses " ++
+							" WHERE ValidFrom > :validFrom AND AddressType != 'eMail   '"
+						]]]>
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+
+				<flow-ref name="mssql-main-query" doc:name="query main db"/>
+			</when>
+			<otherwise>
+				<!-- There is no data to process, initializing varialbes for next steps-->
+				<set-variable doc:name="initialized processed records" variableName="recordsProcessed" value="#[0]"/>
+				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
+			</otherwise>
+		</choice>
+
+
+		<choice doc:name="create API payload?" >
+            <when expression='#[ vars.recordsProcessed > 0 ]'>
+
+				<flow-ref name="save-status-step5" doc:name="save batch status 5"/>
+
+				<ee:transform doc:name="api payload" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							import * from dw::core::Strings
+							output application/json skipNullOn="everywhere"
+							---
+							payload map (item, value) ->{
+								addressId: 		item.INNO_ID as String,
+								contactId: 		item.ContactID as String,
+								'type': 		trim(capitalize(item.AddressType)),
+								address1: 		item.Address1,
+								address2: 		item.Address2,
+								address3: 		item.Address3,
+								city: 			item.City,
+								state: 			item.State,
+								zipCode: 		item.ZipCode,
+								country: 		item.CountryCode as String,
+								primary: 		if (item.primaryaddressflag != 0) true else false,
+								date: 			item.ValidFrom
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
+
+				<flow-ref name="call-api" doc:name="call api"/>
+            </when>
+        </choice>
+
+		<!-- Analyze results and post message to the response queue -->
+		<flow-ref name="publish-message" doc:name="analyze and route message"/>
+
+        <error-handler ref="global-error-handler" />
+	</flow>
+</mule>
