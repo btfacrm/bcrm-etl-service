@@ -55,9 +55,10 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 							"   INNO_ID, ContactID, PhoneTypeCode, PhoneNumber, PrimaryPhoneNumberFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_ContactPhones " ++
-							" WHERE ValidFrom > :validFrom "
+							" WHERE ContactID IN ('360831','439189','395021','319484','84376','90829','9248','47056','349722','360851','439194')"
 						]]]>
 						</ee:set-variable>
+						<!-- " WHERE ValidFrom > :validFrom " -->
 					</ee:variables>
 				</ee:transform>
 
