@@ -93,14 +93,14 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			item.CustomerAccountNumber_Key as String,
-								agencyCode: 		item.Agency_Code,
-								agencyDescription: 	item.AgencyName,
-								regionCode: 		item.Region_Code,
-								regionDescription: 	item.RegionName,
-								tribeCode: 			item.Tribe_Code,
-								tribeDescription: 	item.TribeName,
-								date: 				item.ValidFrom
+								account: 			trim(item.CustomerAccountNumber_Key) as String,
+								agencyCode: 		trim(item.Agency_Code),
+								agencyDescription: 	trim(item.AgencyName),
+								regionCode: 		trim(item.Region_Code),
+								regionDescription: 	trim(item.RegionName),
+								tribeCode: 			trim(item.Tribe_Code) as Number as String,
+								tribeDescription: 	trim(item.TribeName),
+								date: 				trim(item.ValidFrom)
 							}
 							]]>
 						</ee:set-payload>
