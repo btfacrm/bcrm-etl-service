@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+ 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:opentelemetry="http://www.mulesoft.org/schema/mule/opentelemetry"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 
+		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 
+		http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<flow name="view-phone">
+
+		<logger level="INFO" category="app" message="#['Process Phone View']" />
+
+		<!-- Read Watermark -->
+        <set-variable doc:name="set view" variableName="view" value="phone" />
+		<flow-ref name="watermark-read"/>
+
+		<!-- Create query for Database View -->
+		<ee:transform doc:name="query phone" >
+			<ee:variables >
+				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+					output application/json skipNullOn="everywhere"
+					---
+					" SELECT top " ++ vars.maxRecords as String ++
+					"   INNO_ID, ContactID, PhoneTypeCode, PhoneNumber, PrimaryPhoneNumberFlag, " ++
+					"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+					" FROM VCrm_ContactPhones " ++
+					" WHERE ValidFrom > :validFrom "
+				]]]>
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+
+		<flow-ref name="mssql-query"/>
+
+		<choice doc:name="records to process?" >
+            <when expression='#[ vars.recordsProcessed > 0 ]'>
+				<ee:transform doc:name="api payload" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json skipNullOn="everywhere"
+							---
+							payload map (item, value) ->{
+								phoneId:	item.INNO_ID as String,
+								contactId:	item.ContactID as String,
+								'type':		trim(item.PhoneTypeCode),
+								number:		item.PhoneNumber,
+								primary:	!isEmpty(item.PrimaryPhoneNumberFlag) and item.PrimaryPhoneNumberFlag != 0,
+								date:		item.ValidFrom
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
+
+				<set-variable doc:name="set servicePath" variableName="servicePath" value="${service.path.phone}" />
+				<set-variable doc:name="set statusValidator" variableName="statusValidator" value="200" />
+				<flow-ref name="send-api"/>
+            </when>
+			<otherwise>
+				<flow-ref name="watermark-update-norecords"/>
+			</otherwise>
+        </choice>     
+
+        <error-handler ref="global-error-handler" />
+	</flow>
+</mule>
