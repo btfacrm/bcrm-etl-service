@@ -56,9 +56,10 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 							"   City, State, ZipCode, CountryCode, primaryaddressflag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
-							" WHERE ValidFrom > :validFrom AND AddressType != 'eMail   '"
+							" WHERE ContactID IN ('360831','439189','395021','319484','84376','90829','9248','47056','349722','360851','439194')"
 						]]]>
 						</ee:set-variable>
+						<!-- " WHERE ValidFrom > :validFrom AND AddressType != 'eMail   '" -->
 					</ee:variables>
 				</ee:transform>
 
