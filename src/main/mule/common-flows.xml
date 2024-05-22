@@ -223,7 +223,7 @@
 
 		<choice doc:name="query view?" >
             <when expression='#[ isEmpty(vars.customMaxRecords)]'>
-				<set-variable doc:name="set maxRecords" variableName="maxRecords" value="${maxrecords}" />
+				<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[${maxrecords}]" />
 			</when>
 			<otherwise>
 				<set-variable doc:name="set maxRecords" variableName="maxRecords" value="#[vars.customMaxRecords as Number]" />
