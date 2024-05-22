@@ -29,7 +29,7 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					  value='#["SELECT count(*) total from Vcrm_AccountMaster WHERE ValidFrom > :validFrom" ]' />
+					  value='#["SELECT count(*) total from Vcrm_AccountMaster WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
@@ -70,7 +70,7 @@
 							" FROM Vcrm_AccountMaster " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" ValidFrom > :validFrom "
+									" ValidFrom >= :validFrom "
 								else 
 									" ValidFrom between :start and :end "
 							) ++
@@ -106,23 +106,23 @@
 								account: 			  trim(item.CustomerAccountNumber),
 								contactId: 			  item.OwnerContactID as String,
 								(tierLevelCode: 	  item.AccountTierLevelNum as String) if (!isEmpty(item.AccountTierLevelNum)),
-								(tierLevelDescription: trim(item.AccountTierLevelDesc)) if (!isEmpty(item.AccountTierLevelDesc)),
+								(tierLevelDescription: trim(item.AccountTierLevelDesc replace "\"" with "'")) if (!isEmpty(item.AccountTierLevelDesc)),
 								(freezeCode: 		  trim(item.FreezeCode)) if (!isEmpty(item.FreezeCode)),
-								(freezeDescription:   trim(item.FreezeDesc)) if (!isEmpty(item.FreezeDesc)),
+								(freezeDescription:   trim(item.FreezeDesc replace "\"" with "'")) if (!isEmpty(item.FreezeDesc)),
 								typeCode: 			  trim(item.AccountTypeCode),
-								typeDescription: 	  trim(item.AccountTypeDescription),
+								typeDescription: 	  trim(item.AccountTypeDescription replace "\"" with "'"),
 								categoryCode: 		  trim(item.AccountCategoryCode),
-								categoryDescription:  trim(item.AccountCategoryDescription),
+								categoryDescription:  trim(item.AccountCategoryDescription replace "\"" with "'"),
 								adminOfficerId: 	  trim(item.AdminOfficerContactID) as String,
-								adminOfficerName: 	  trim(item.AdministratorName),
+								adminOfficerName: 	  trim(item.AdministratorName replace "\"" with "'"),
 								activeFlag: 		  if (item.ActiveFlag != 0) true else false,
 								openedDate: 		  item.DateOpened,
 								(closedDate: 		  item.ClosedDate) if (!isEmpty(item.ClosedDate)),
 								closedFlag: 		  if (item.ClosedFlag != 0) true else false,
-								(line1: 			  trim(item.CustomerDescriptionLine1)) if (!isEmpty(item.CustomerDescriptionLine1)),
-								(line2: 			  trim(item.CustomerDescriptionLine2)) if (!isEmpty(item.CustomerDescriptionLine2)),
-								(line3: 			  trim(item.CustomerDescriptionLine3)) if (!isEmpty(item.CustomerDescriptionLine3)),
-								(line4: 			  trim(item.CustomerDescriptionLine4)) if (!isEmpty(item.CustomerDescriptionLine4)),
+								(line1: 			  trim(item.CustomerDescriptionLine1 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine1)),
+								(line2: 			  trim(item.CustomerDescriptionLine2 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine2)),
+								(line3: 			  trim(item.CustomerDescriptionLine3 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine3)),
+								(line4: 			  trim(item.CustomerDescriptionLine4 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine4)),
 								date: 				  item.ValidFrom,
 								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime))
 							}
@@ -131,6 +131,8 @@
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>
