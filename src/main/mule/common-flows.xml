@@ -63,9 +63,10 @@
         <logger level="INFO" category="app" message="#['Analisys for watermark update, httpstatus: ' ++ vars.httpStatus]" />
         <choice doc:name="verify http call" >
             <when expression='#[ vars.httpStatus != 200 ]'>
-				<!-- There was an error in Salesforce API -->
-                <logger level="INFO" category="app" message="#['There was an error in the Salesforce API']" />
+				<!-- There was an error in Salesforce API, last execution is the first element in the input payload -->
+                <logger level="INFO" category="app" message="#['Watermark: There was an error in the Salesforce API']" />
 				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#[500]"/>
+				<set-variable doc:name="lastExecution" variableName="lastExecution" value="#[vars.firstElementDate]"/>
 				<set-variable doc:name="set lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
 				<ee:transform doc:name="query update watermark" >
 					<ee:variables >
@@ -76,6 +77,7 @@
 							"   ApiResponse = :apiResponse, " ++
 							"   lastErrorDate = :lastExecution, " ++
 							"   LastErrorResponse = :lastErrorResponse, " ++
+							"   LastExecution = :lastExecution, " ++
 							"   Retries = Retries + 1 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>
@@ -85,7 +87,7 @@
             </when>
 			<otherwise>
 				<!-- A successfull call to Salesforce API -->
-				<logger level="INFO" category="app" message="#['Success call to Salesforce API']" />
+				<logger level="INFO" category="app" message="#['Watermark: Success call to Salesforce API']" />
 				<ee:transform doc:name="query update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0

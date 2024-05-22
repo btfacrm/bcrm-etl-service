@@ -29,7 +29,7 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(DISTINCT ContactID) total from VCrm_ContactMaster WHERE ValidFrom > :validFrom" ]' />
+					value='#["SELECT count(DISTINCT ContactID) total from VCrm_ContactMaster WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
@@ -48,8 +48,8 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT DISTINCT " ++
-							"   ContactID, SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
+							" SELECT DISTINCT ContactID" ++
+							"   SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
 							"   RTRIM(PrimaryLastName) as PrimaryLastName, " ++
 							"   RTRIM(PrimaryMiddleInitial) as PrimaryMiddleInitial, " ++
 							"   RTRIM(PrimaryFirstName) as PrimaryFirstName, " ++
@@ -62,11 +62,11 @@
 							" FROM VCrm_ContactMaster  " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" ValidFrom > :validFrom "
+									" ValidFrom >= :validFrom "
 								else 
 									" ValidFrom between :start and :end "
 							) ++
-							" ORDER BY ContactID, ValidFrom " ++
+							" ORDER BY ValidFrom, ContactID " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
@@ -96,10 +96,10 @@
 							---
 							payload map (item, value) ->{
 								contactId: 		 item.ContactID as String,
-								(firstName: 	 item.PrimaryFirstName) if (!isEmpty(item.PrimaryFirstName)),
-								(lastName: 		 item.PrimaryLastName) if (!isEmpty(item.PrimaryLastName)),
-								(middleInitial:  item.PrimaryMiddleInitial) if (!isEmpty(item.PrimaryMiddleInitial)),
-								name: 			 item.ContactName,
+								(firstName: 	 item.PrimaryFirstName replace "\"" with "'") if (!isEmpty(item.PrimaryFirstName)),
+								(lastName: 		 item.PrimaryLastName replace "\"" with "'") if (!isEmpty(item.PrimaryLastName)),
+								(middleInitial:  item.PrimaryMiddleInitial replace "\"" with "'") if (!isEmpty(item.PrimaryMiddleInitial)),
+								name: 			 item.ContactName replace "\"" with "'",
 								(gender: 		 item.PrimaryGender) if (!isEmpty(item.PrimaryGender)),
 								(ssn: 			 item.SSN) if (!isEmpty(item.SSN)),
 								ssnFlag: 		 !isEmpty(item.SSNFlag) and item.SSNFlag != 0,
@@ -114,6 +114,8 @@
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>

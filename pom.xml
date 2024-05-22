@@ -47,6 +47,7 @@
 							<artifactId>mssql-jdbc</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
+					<classifier>mule-application</classifier>
 				</configuration>
 			</plugin>
 		</plugins>

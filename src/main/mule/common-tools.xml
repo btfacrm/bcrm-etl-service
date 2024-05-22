@@ -99,7 +99,7 @@
 		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[payload]'  />
 
 		<http:request config-ref="HTTP_Request_Configuration" 
-			method="POST" path="#[vars.servicePath]" responseTimeout="#[1800000]" sendCorrelationId="ALWAYS">
+			method="POST" path="#[vars.servicePath ++ '?batchNumber=' ++ vars.batchNumber]" responseTimeout="#[1800000]" sendCorrelationId="ALWAYS">
 			<http:headers><![CDATA[#[output application/java ---
 				{
 					"Content-Type"  : "application/json",
