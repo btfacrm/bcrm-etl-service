@@ -58,7 +58,7 @@
 							"   RTRIM(TribeName) as TribeName, " ++
 							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM Vcrm_RegionAgencyTribe  " ++
-							" WHERE CustomerAccountNumber_Key IN('012J000542','012J000628','012J000656','012J000691','012J000702','012J000718','012J000741','012J000786')"++
+							" WHERE CustomerAccountNumber_Key IN('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384')"++
 							" ORDER BY StartTime " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"

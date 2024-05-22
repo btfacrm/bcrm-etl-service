@@ -61,7 +61,7 @@
 							"   FORMAT(Temporary_CourtOrder_ExpireDate, 'yyyy-MM-dd') AS Temporary_CourtOrder_ExpireDate, " ++
 							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
 							" FROM VCrm_AccountMaster_UDF  " ++
-							" WHERE CustomerAccountNumber_Key IN('012J000542','012J000628','012J000656','012J000691','012J000702','012J000718','012J000741','012J000786')"
+							" WHERE CustomerAccountNumber_Key IN('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384')"
 							]]]>
 						</ee:set-variable>
 						<!-- " WHERE StartTime > :validFrom " -->
