@@ -41,6 +41,7 @@
 
 		<choice doc:name="query view?" >
             <when expression='#[ vars.expectedRecords > 0 ]'>
+			
 				<!-- Create query for view -->
 				<flow-ref name="save-status-step4" doc:name="save batch status 4"/>
 				<ee:transform doc:name="sql for view" >

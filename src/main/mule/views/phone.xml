@@ -9,8 +9,6 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"  
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 		http://www.mulesoft.org/schema/mule/ee/core 
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd	
 		http://www.mulesoft.org/schema/mule/core 
@@ -31,7 +29,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					  value='#["SELECT count(*) total from VCrm_ContactPhones WHERE ValidFrom > :validFrom" ]' />
+					  value='#["SELECT count(*) total from VCrm_ContactPhones WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
@@ -51,14 +49,21 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT top " ++ vars.maxRecords as String ++
+							" SELECT " ++
 							"   INNO_ID, ContactID, PhoneTypeCode, PhoneNumber, PrimaryPhoneNumberFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_ContactPhones " ++
-							" WHERE ContactID IN ('360831','439189','395021','319484','84376','90829','9248','47056','349722','360851','439194')"
+							" WHERE " ++ (
+								if (isEmpty(vars.customWatermarkStart))
+									" ValidFrom >= :validFrom "
+								else 
+									" ValidFrom between :start and :end "
+							) ++
+							" ORDER BY ValidFrom, ContactID " ++
+							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
+							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
 						</ee:set-variable>
-						<!-- " WHERE ValidFrom > :validFrom " -->
 					</ee:variables>
 				</ee:transform>
 
@@ -95,6 +100,8 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>
