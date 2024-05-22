@@ -48,7 +48,7 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT DISTINCT ContactID" ++
+							" SELECT DISTINCT ContactID," ++
 							"   SSNFlag, ActiveFlag, DisbursementEligibilityFlag, " ++
 							"   RTRIM(PrimaryLastName) as PrimaryLastName, " ++
 							"   RTRIM(PrimaryMiddleInitial) as PrimaryMiddleInitial, " ++
