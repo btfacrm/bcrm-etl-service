@@ -50,7 +50,11 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   INNO_ID, ContactID, PhoneTypeCode, PhoneNumber, PrimaryPhoneNumberFlag, " ++
+							"   INNO_ID, " ++
+							"   ContactID, " ++
+							"   PrimaryPhoneNumberFlag, " ++
+							"   RTRIM(PhoneTypeCode) as PhoneTypeCode, " ++				
+							"   RTRIM(PhoneNumber) as PhoneNumber, " ++				
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_ContactPhones " ++
 							" WHERE " ++ (
@@ -90,7 +94,7 @@
 							payload map (item, value) ->{
 								phoneId:	item.INNO_ID as String,
 								contactId:	item.ContactID as String,
-								'type':		trim(item.PhoneTypeCode),
+								'type':		item.PhoneTypeCode,
 								number:		item.PhoneNumber,
 								primary:	!isEmpty(item.PrimaryPhoneNumberFlag) and item.PrimaryPhoneNumberFlag != 0,
 								date:		item.ValidFrom
