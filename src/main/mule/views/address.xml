@@ -59,7 +59,7 @@
 							"   City, State, CountryCode, primaryaddressflag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
-							" WHERE " ++ (
+							" WHERE AddressType != 'eMail' AND " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
 								else 
