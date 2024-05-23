@@ -59,10 +59,14 @@
 							"   City, State, CountryCode, primaryaddressflag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
-							" WHERE ContactID IN ('320433','81975','428704','395745','81975','29639','81975')"
+							" WHERE " ++ (
+								if (isEmpty(vars.customWatermarkStart))
+									" ValidFrom >= :validFrom "
+								else 
+									" ValidFrom between :start and :end "
+							) ++
 						]]]>
 						</ee:set-variable>
-						<!-- " WHERE ValidFrom > :validFrom AND AddressType != 'eMail   '" -->
 					</ee:variables>
 				</ee:transform>
 
