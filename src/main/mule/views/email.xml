@@ -30,7 +30,7 @@
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<ee:transform doc:name="query expected records" >
 					<ee:variables >
-						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0 output application/json ---
 							" SELECT count(*) total from VCrm_Addresses WHERE AddressType = 'eMail' AND ValidFrom >= :validFrom"
 						]]]>
 						</ee:set-variable>
@@ -40,7 +40,7 @@
 			<otherwise>
 				<ee:transform doc:name="query expected records with custom dates" >
 					<ee:variables >
-						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0 output application/json ---
 							" SELECT count(*) total from VCrm_Addresses WHERE AddressType = 'eMail' AND ValidFrom between :start and :end"
 						]]]>
 						</ee:set-variable>
