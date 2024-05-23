@@ -18,7 +18,7 @@
 		http://www.mulesoft.org/schema/mule/vm 
 		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	
-	<flow name="queue-address">
+	<flow name="queue-email">
 		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="email" timeout="60" timeoutUnit="MINUTES"/>
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
 
