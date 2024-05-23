@@ -29,7 +29,7 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					  value='#["SELECT count(*) total from VCrm_AccountMaster_UDF WHERE StartTime > :validFrom" ]' />
+					  value='#["SELECT count(*) total from VCrm_AccountMaster_UDF WHERE StartTime >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
@@ -61,10 +61,17 @@
 							"   FORMAT(Temporary_CourtOrder_ExpireDate, 'yyyy-MM-dd') AS Temporary_CourtOrder_ExpireDate, " ++
 							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
 							" FROM VCrm_AccountMaster_UDF  " ++
-							" WHERE CustomerAccountNumber_Key IN('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384')"
+							" WHERE " ++ (
+								if (isEmpty(vars.customWatermarkStart))
+									" StartTime >= :validFrom "
+								else 
+									" StartTime between :start and :end "
+							) ++
+							" ORDER BY StartTime, CustomerAccountNumber_Key " ++
+							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
+							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 							]]]>
 						</ee:set-variable>
-						<!-- " WHERE StartTime > :validFrom " -->
 					</ee:variables>
 				</ee:transform>
 
@@ -106,6 +113,8 @@
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>

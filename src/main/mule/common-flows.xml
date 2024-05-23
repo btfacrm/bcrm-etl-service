@@ -75,7 +75,7 @@
 							---
 							" UPDATE BCMS_WaterMark SET " ++ 
 							"   ApiResponse = :apiResponse, " ++
-							"   lastErrorDate = :lastExecution, " ++
+							"   LastErrorDate = :lastErrorDate, " ++
 							"   LastErrorResponse = :lastErrorResponse, " ++
 							"   LastExecution = :lastExecution, " ++
 							"   Retries = Retries + 1 " ++
