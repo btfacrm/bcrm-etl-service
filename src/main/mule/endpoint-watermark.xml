@@ -3,6 +3,7 @@
 <mule
     xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
  	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" 
     xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
@@ -17,6 +18,8 @@
         http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 		http://www.mulesoft.org/schema/mule/db 
 		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+		http://www.mulesoft.org/schema/mule/os 
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 		http://www.mulesoft.org/schema/mule/tls
 		http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
 	
@@ -79,38 +82,88 @@
 
 		<set-variable doc:name="lastExecution" variableName="lastExecution" value="#[payload.lastExecution as DateTime]" />
 		<set-variable doc:name="view" variableName="view" value="#[payload.view]" />
-        <!-- <logger doc:name="lastExecution" level="INFO" category="app" message="#['lastExecution: ' ++ vars.lastExecution]"/> -->
 
-		<ee:transform doc:name="update watermark" >
-			<ee:variables >
-				<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
-					output application/json
-					---
-					" UPDATE BCMS_WaterMark SET " ++ 
-					"   LastExecution = :lastExecution " ++
-					" WHERE ViewName = '" ++ vars.view ++ "'"
-				]]]>
-				</ee:set-variable>
-			</ee:variables>
-		</ee:transform>
+        <!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
 
-        <flow-ref name="mssql-watermark-update"/>
+		<choice doc:name="verify if view is valid" >
+            <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address"] contains vars.view ]'>
 
-		<ee:transform doc:name="response" >
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-					output application/json
-					---
-					{
-						status: 200,
-						message: "Watermark was updated sucessfully",
-						correlationId: correlationId,
-						view: vars.view
-					}
-					]]>
-				</ee:set-payload>
-			</ee:message>
-		</ee:transform>	
+				<os:retrieve key="#[vars.view]" objectStore="Object_store" target="etlMemoryStatus">
+					<os:default-value>#[""]</os:default-value>
+				</os:retrieve>
+
+				<choice doc:name="is the etl process running ?" >
+            		<when expression='#[ isEmpty(vars.etlMemoryStatus) ]'>
+
+						<ee:transform doc:name="update watermark" >
+							<ee:variables >
+								<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
+									output application/json
+									---
+									" UPDATE BCMS_WaterMark SET " ++ 
+									"   LastExecution = :lastExecution " ++
+									" WHERE ViewName = '" ++ vars.view ++ "'"
+								]]]>
+								</ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+
+						<flow-ref name="mssql-watermark-update"/>
+
+						<ee:transform doc:name="response" >
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+									output application/json
+									---
+									{
+										status: 200,
+										message: "Watermark was updated sucessfully",
+										correlationId: correlationId,
+										view: vars.view
+									}
+									]]>
+								</ee:set-payload>
+							</ee:message>
+						</ee:transform>	
+					</when>
+					<otherwise>
+
+						<ee:transform doc:name="Can not update watermark while running the etl for the same view" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+									output application/json
+									---
+									{
+										status: 419,
+										message: "The service is still processing, can not update the watermark",
+										view: vars.view,
+										etlStatus: vars.etlMemoryStatus
+									}
+									]]>
+								</ee:set-payload>
+							</ee:message>
+						</ee:transform>	
+
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="http response" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+							output application/json
+							---
+							{
+								status: 404,
+								message: "Incorrect view",
+								view: vars.view
+							}
+							]]>
+						</ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
 
     </sub-flow>
 

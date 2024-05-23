@@ -26,12 +26,22 @@
 		<flow-ref name="query-watermark-validfrom" doc:name="get watermark data"/>
 
 		<!-- Get the expected the number of records to process for all batches, triggered only in first batch  -->
-		<set-variable doc:name="query expected records" variableName="query" 
-					  value='#["SELECT count(*) total from VCrm_CashBalance_Book WHERE BalanceValidFrom > :validFrom" ]' />
+		<choice doc:name="custom watermark dates?" >
+            <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
+				<set-variable doc:name="query expected records" variableName="query" 
+					  value='#["SELECT count(*) total from VCrm_CashBalance_Book WHERE BalanceValidFrom >= :validFrom" ]' />
+			</when>
+			<otherwise>
+				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
+					value="#['SELECT count(*) total from VCrm_CashBalance_Book WHERE BalanceValidFrom between :start and :end' ]" />
+			</otherwise>
+		</choice>
+
 		<flow-ref name="get-expected-records" doc:name="get expected records to process"/>
 
 		<choice doc:name="query view?" >
             <when expression='#[ vars.expectedRecords > 0 ]'>
+
 				<!-- Create query for view -->
 				<flow-ref name="save-status-step4" doc:name="save batch status 4"/>
 				<ee:transform doc:name="sql for view" >
@@ -43,13 +53,17 @@
 							"   CustomerAccountNumber, EndingAccountBalance, " ++
 							"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
 							" FROM VCrm_CashBalance_Book  " ++
-							" WHERE CustomerAccountNumber IN('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384')"++
-							" ORDER BY BalanceValidFrom " ++
+							" WHERE " ++ (
+								if (isEmpty(vars.customWatermarkStart))
+									" BalanceValidFrom >= :validFrom "
+								else 
+									" BalanceValidFrom between :start and :end "
+							) ++
+							" ORDER BY BalanceValidFrom, CustomerAccountNumber " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
 						</ee:set-variable>
-						<!-- " WHERE BalanceValidFrom > :validFrom "  -->
 					</ee:variables>
 				</ee:transform>
 
@@ -83,6 +97,8 @@
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>

@@ -209,7 +209,7 @@
 		<set-variable doc:name="get view to process" variableName="view" value="#[payload.view]" />
 
         <!-- Extract batch metadata -->
-		<logger doc:name="payload" level="INFO" category="app" message="#[payload]"/>
+		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
 		<set-variable doc:name="save queueMesssage" variableName="queueMessage" value='#[payload]' />
 		<set-variable doc:name="set offset" variableName="offset" value='#[payload.offset as Number]' />
 		<set-variable doc:name="set batchNumber" variableName="batchNumber" value='#[payload.batchNumber as Number + 1]' />
@@ -230,7 +230,7 @@
 			</otherwise>
 		</choice>
 		<logger level="INFO" category="app" 
-			message="#[output application/java --- 'Executing queue process for view: ' ++ vars.view ++ ', max records x batch: ' ++ vars.maxRecords]" />
+			message="#[output application/java --- 'Executing queue for view: ' ++ vars.view ++ ', current batch: ' ++ vars.batchNumber ++ ', offset:' ++ vars.offset ++  ', records x batch: ' ++ vars.maxRecords ++ ', expected records: ' ++ vars.expectedRecords]" />
 
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.view == "contact" ]'>

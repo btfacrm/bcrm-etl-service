@@ -112,8 +112,9 @@
 				<http:success-status-code-validator values="#[vars.statusValidator]" />
 			</http:response-validator>
 		</http:request>
-		<logger doc:name="response" level="INFO" message='#[payload]' />
-		<logger doc:name="status code" level="INFO" message='#["Http status code: " ++ (attributes.statusCode as String)]' />
+
+		<!-- <logger doc:name="response" level="INFO" message='#[payload]' /> -->
+		<logger doc:name="status code" level="INFO" message='#["Response status code: " ++ (attributes.statusCode as String)]' />
 		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
 		<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[payload]'/>
 
