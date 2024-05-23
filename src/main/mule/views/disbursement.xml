@@ -62,7 +62,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
 							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
 							" FROM VCrm_Disbursement "++
-							" WHERE CustomerAccountNumber IN('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384')"
+							" WHERE EffectiveDate > :validFrom "
 													]]]>
 						</ee:set-variable>
 						<!-- " WHERE EffectiveDate > :validFrom "  -->
