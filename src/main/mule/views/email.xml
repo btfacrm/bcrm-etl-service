@@ -19,7 +19,7 @@
 		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	
 	<flow name="queue-address">
-		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="address" timeout="60" timeoutUnit="MINUTES"/>
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="email" timeout="60" timeoutUnit="MINUTES"/>
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
 
 		<!-- Get validFrom Watermark -->
@@ -31,7 +31,7 @@
 				<ee:transform doc:name="query expected records" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
-							" SELECT count(*) total from VCrm_Addresses WHERE AddressType != 'eMail' AND ValidFrom >= :validFrom"
+							" SELECT count(*) total from VCrm_Addresses WHERE AddressType = 'eMail' AND ValidFrom >= :validFrom"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
@@ -41,7 +41,7 @@
 				<ee:transform doc:name="query expected records with custom dates" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
-							" SELECT count(*) total from VCrm_Addresses WHERE AddressType != 'eMail' AND ValidFrom between :start and :end"
+							" SELECT count(*) total from VCrm_Addresses WHERE AddressType = 'eMail' AND ValidFrom between :start and :end"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
@@ -64,14 +64,11 @@
 							" SELECT " ++
 							"   INNO_ID, ContactID, " ++
 							"   RTRIM(AddressType) as AddressType, " ++
-							"   RTRIM(Address1) as Address1, " ++
-							"   RTRIM(Address2) as Address2, " ++
-							"   RTRIM(Address3) as Address3, " ++
 							"   RTRIM(ZipCode) as ZipCode, " ++
 							"   City, State, CountryCode, primaryaddressflag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
-							" WHERE AddressType != 'eMail' AND " ++ (
+							" WHERE AddressType = 'eMail' AND " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
 								else 
@@ -107,12 +104,9 @@
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								addressId: 		item.INNO_ID as String,
+								emailId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
 								'type': 		trim(item.AddressType),
-								address1: 		item.Address1,
-								address2: 		item.Address2,
-								address3: 		item.Address3,
 								city: 			item.City,
 								state: 			item.State,
 								zipCode: 		item.ZipCode,
