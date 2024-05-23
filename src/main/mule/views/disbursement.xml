@@ -61,8 +61,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
 							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
 							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
-							" FROM VCrm_Disbursement "++
-							" WHERE EffectiveDate > :validFrom "
+							" FROM VCrm_Disbursement "
 													]]]>
 						</ee:set-variable>
 						<!-- " WHERE EffectiveDate > :validFrom "  -->
