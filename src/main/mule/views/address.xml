@@ -65,6 +65,9 @@
 								else 
 									" ValidFrom between :start and :end "
 							) ++
+							" ORDER BY ValidFrom, INNO_ID " ++
+							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
+							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
