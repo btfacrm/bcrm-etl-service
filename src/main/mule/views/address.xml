@@ -9,8 +9,6 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"  
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 		http://www.mulesoft.org/schema/mule/ee/core 
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd	
 		http://www.mulesoft.org/schema/mule/core 
@@ -31,7 +29,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					  value='#["SELECT count(*) total from VCrm_Addresses WHERE ValidFrom > :validFrom" ]' />
+					  value='#["SELECT count(*) total from VCrm_Addresses WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
@@ -51,9 +49,14 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT top " ++ vars.maxRecords as String ++
-							"   INNO_ID, ContactID, AddressType, Address1, Address2, Address3, " ++
-							"   City, State, ZipCode, CountryCode, primaryaddressflag, " ++
+							" SELECT " ++
+							"   INNO_ID, ContactID, " ++
+							"   RTRIM(AddressType) as AddressType, " ++
+							"   RTRIM(Address1) as Address1, " ++
+							"   RTRIM(Address2) as Address2, " ++
+							"   RTRIM(Address3) as Address3, " ++
+							"   RTRIM(ZipCode) as ZipCode, " ++
+							"   City, State, CountryCode, primaryaddressflag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
 							" WHERE ContactID IN ('320433','81975','428704','395745','81975','29639','81975')"
@@ -87,7 +90,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 							payload map (item, value) ->{
 								addressId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
-								'type': 		trim(capitalize(item.AddressType)),
+								'type': 		trim(item.AddressType),
 								address1: 		item.Address1,
 								address2: 		item.Address2,
 								address3: 		item.Address3,
@@ -103,6 +106,8 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>
