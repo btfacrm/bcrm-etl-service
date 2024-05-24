@@ -50,7 +50,7 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   UPPER(RTRIM(CustomerAccountNumber)) AS CustomerAccountNumber, " ++
+							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
 							"   EndingAccountBalance, " ++
 							"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
 							" FROM VCrm_CashBalance_Book  " ++

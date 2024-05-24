@@ -50,11 +50,11 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   UPPER(RTRIM(CustomerAccountNumber)), " ++
+							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
 							"   OwnerContactID, " ++
 							"   AccountTierLevelNum, AccountTierLevelDesc, " ++
 							"   RTRIM(FreezeCode) as FreezeCode, " ++
-							"   RTRIM(FreezeDesc) AS FreezeDesc, " ++
+							"   RTRIM(FreezeDesc) as FreezeDesc, " ++
 							"   AccountTypeCode, AccountTypeDescription, " ++
 							"   AccountCategoryCode, AccountCategoryDescription, " ++
 							"   AdminOfficerContactID, AdministratorName, " ++
