@@ -49,7 +49,7 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT top " ++ vars.maxRecords as String ++
+							" SELECT " ++
 							"   RTRIM(CustomerAccountNumber_Key) as CustomerAccountNumber_Key, " ++
 							"   RTRIM(Managed_Agency_Code) as Managed_Agency_Code, " ++
 							"   RTRIM(BirthCert_OnFile) as BirthCert_OnFile, " ++
@@ -96,7 +96,7 @@
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								account: 				item.CustomerAccountNumber_Key as String,
+								account: 				upper(item.CustomerAccountNumber_Key as String),
 								distributionExpiration: item.DistPlan_ExpireDate,
 								temporaryCourtOrderExp: item.Temporary_CourtOrder_ExpireDate,
 								birthCertificate: 		if (item.BirthCert_OnFile != 0) true else false,

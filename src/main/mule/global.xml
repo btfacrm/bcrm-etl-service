@@ -112,6 +112,7 @@
 			<vm:queue queueName="agencyregion" />
 			<vm:queue queueName="phone" />
 			<vm:queue queueName="address" />
+			<vm:queue queueName="email" />
 		</vm:queues>
 	</vm:config>
 

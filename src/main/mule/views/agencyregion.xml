@@ -94,13 +94,13 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			trim(item.CustomerAccountNumber_Key) as String,
-								agencyCode: 		trim(item.Agency_Code),
-								agencyDescription: 	trim(item.AgencyName),
-								regionCode: 		trim(item.Region_Code),
-								regionDescription: 	trim(item.RegionName),
-								tribeCode: 			trim(item.Tribe_Code) as Number as String,
-								tribeDescription: 	trim(item.TribeName),
+								account: 			upper(trim(item.CustomerAccountNumber_Key)),
+								(agencyCode: 		item.Agency_Code) if (!isEmpty(item.Agency_Code)),
+								(agencyDescription: item.AgencyName) if (!isEmpty(item.AgencyName)),
+								(regionCode: 		item.Region_Code) if (!isEmpty(item.Region_Code)),
+								(regionDescription: item.RegionName) if (!isEmpty(item.RegionName)),
+								(tribeCode: 		item.Tribe_Code as String) if (!isEmpty(item.Tribe_Code)),
+								(tribeDescription: 	item.TribeName) if (!isEmpty(item.TribeName)),
 								date: 				trim(item.StartTime)
 							}
 							]]>
