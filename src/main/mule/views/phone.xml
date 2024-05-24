@@ -57,18 +57,17 @@
 							"   RTRIM(PhoneNumber) as PhoneNumber, " ++				
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_ContactPhones " ++
-							" WHERE ContactID IN ('320433','81975','428704','395745','81975','29639','81975')"++
+							" WHERE " ++ (
+								if (isEmpty(vars.customWatermarkStart))
+									" ValidFrom >= :validFrom "
+								else 
+									" ValidFrom between :start and :end "
+							) ++ 
 							" ORDER BY ValidFrom, ContactID " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
 						</ee:set-variable>
-						<!-- " WHERE " ++ (
-								if (isEmpty(vars.customWatermarkStart))
-									" ValidFrom >= :validFrom "
-								else 
-									" ValidFrom between :start and :end "
-							) ++ -->
 					</ee:variables>
 				</ee:transform>
 

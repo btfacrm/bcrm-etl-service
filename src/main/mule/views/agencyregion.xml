@@ -56,20 +56,20 @@
 							"   RTRIM(RegionName) as RegionName, " ++
 							"   RTRIM(Tribe_Code) as Tribe_Code, " ++
 							"   RTRIM(TribeName) as TribeName, " ++
-							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
+							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
 							" FROM Vcrm_RegionAgencyTribe  " ++
-							" WHERE CustomerAccountNumber_Key IN('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384')"++
-							" ORDER BY StartTime " ++
-							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
-							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
-						]]]>
-						</ee:set-variable>
-						<!-- " WHERE " ++ (
+							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" StartTime > :validFrom "
 								else 
 									" StartTime between :start and :end "
-							)  -->
+							) ++							
+							" ORDER BY StartTime, CustomerAccountNumber_Key " ++
+							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
+							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
+						]]]>
+						</ee:set-variable>
+						<!-- -->
 					</ee:variables>
 				</ee:transform>
 
@@ -101,13 +101,15 @@
 								regionDescription: 	trim(item.RegionName),
 								tribeCode: 			trim(item.Tribe_Code) as Number as String,
 								tribeDescription: 	trim(item.TribeName),
-								date: 				trim(item.ValidFrom)
+								date: 				trim(item.StartTime)
 							}
 							]]>
 						</ee:set-payload>
 					</ee:message>
 				</ee:transform>
 
+				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>
