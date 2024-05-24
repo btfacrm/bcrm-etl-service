@@ -99,13 +99,31 @@
 								account: 				item.CustomerAccountNumber_Key as String,
 								distributionExpiration: item.DistPlan_ExpireDate,
 								temporaryCourtOrderExp: item.Temporary_CourtOrder_ExpireDate,
-								birthCertificate: 		if (item.BirthCert_OnFile != 0) true else false,
+								birthCertificate: 		if (!isEmpty(item.BirthCert_OnFile))
+															if (item.BirthCert_OnFile == "1")
+																true
+															else
+																false
+														else
+															false,
 								ageMajority: 			item.Age_Of_Majority,
 								(line5: 			    trim(item.Long_Name_Line_5 replace "\"" with "'")) if (!isEmpty(item.Long_Name_Line_5)),
-								pendingSocServ: 		if (item.Pending_SocialServices_Assessment != 0) true else false,
+								pendingSocServ: 		if (!isEmpty(item.Pending_SocialServices_Assessment))
+															if (item.Pending_SocialServices_Assessment == "1")
+																true
+															else
+																false
+														else
+															false,
 								managedAgencyCode: 		item.Managed_Agency_Code,
 								managedAgencyName: 		item.Managed_Agency_Name,
-								nonResponsiveGuardian: 	item.Non_Responsive_Guardian,
+								nonResponsiveGuardian: 	if (!isEmpty(item.Non_Responsive_Guardian))
+															if (item.Non_Responsive_Guardian == "1")
+																true
+															else
+																false
+														else
+															false,
 								date: 					item.StartTime
 							}
 							]]>
