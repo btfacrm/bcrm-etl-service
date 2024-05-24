@@ -86,7 +86,7 @@
         <!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
 
 		<choice doc:name="verify if view is valid" >
-            <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address"] contains vars.view ]'>
+            <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address","email"] contains vars.view ]'>
 
 				<os:retrieve key="#[vars.view]" objectStore="Object_store" target="etlMemoryStatus">
 					<os:default-value>#[""]</os:default-value>

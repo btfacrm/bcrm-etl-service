@@ -101,7 +101,7 @@
 								temporaryCourtOrderExp: item.Temporary_CourtOrder_ExpireDate,
 								birthCertificate: 		if (item.BirthCert_OnFile != 0) true else false,
 								ageMajority: 			item.Age_Of_Majority,
-								line5: 					item.Long_Name_Line_5,
+								(line5: 			    trim(item.Long_Name_Line_5 replace "\"" with "'")) if (!isEmpty(item.Long_Name_Line_5)),
 								pendingSocServ: 		if (item.Pending_SocialServices_Assessment != 0) true else false,
 								managedAgencyCode: 		item.Managed_Agency_Code,
 								managedAgencyName: 		item.Managed_Agency_Name,
