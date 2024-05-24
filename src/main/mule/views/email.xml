@@ -31,7 +31,7 @@
 				<ee:transform doc:name="query expected records" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0 output application/json ---
-							" SELECT count(*) total from VCrm_Addresses WHERE LOWER(AddressType) = 'email' AND ValidFrom >= :validFrom"
+							" SELECT count(*) total from VCrm_Addresses WHERE LOWER(AddressType) = 'email' AND eMail is not null AND ValidFrom >= :validFrom"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
@@ -41,7 +41,7 @@
 				<ee:transform doc:name="query expected records with custom dates" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0 output application/json ---
-							" SELECT count(*) total from VCrm_Addresses WHERE LOWER(AddressType) = 'email' AND ValidFrom between :start and :end"
+							" SELECT count(*) total from VCrm_Addresses WHERE LOWER(AddressType) = 'email' AND eMail is not null AND ValidFrom between :start and :end"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
@@ -67,7 +67,7 @@
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
 							" WHERE AddressType = 'email' AND " ++
-							"       eMail != null AND " ++ (
+							"       eMail is not null AND " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
 								else 
