@@ -50,7 +50,8 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   CustomerAccountNumber, OwnerContactID, " ++
+							"   UPPER(RTRIM(CustomerAccountNumber)), " ++
+							"   OwnerContactID, " ++
 							"   AccountTierLevelNum, AccountTierLevelDesc, " ++
 							"   RTRIM(FreezeCode) as FreezeCode, " ++
 							"   RTRIM(FreezeDesc) AS FreezeDesc, " ++
@@ -103,7 +104,7 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			  trim(item.CustomerAccountNumber),
+								account: 			  item.CustomerAccountNumber,
 								contactId: 			  item.OwnerContactID as String,
 								(tierLevelCode: 	  item.AccountTierLevelNum as String) if (!isEmpty(item.AccountTierLevelNum)),
 								(tierLevelDescription: trim(item.AccountTierLevelDesc replace "\"" with "'")) if (!isEmpty(item.AccountTierLevelDesc)),

@@ -31,7 +31,7 @@
 				<ee:transform doc:name="query expected records" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0 output application/json ---
-							" SELECT count(*) total from VCrm_Addresses WHERE AddressType = 'eMail' AND ValidFrom >= :validFrom"
+							" SELECT count(*) total from VCrm_Addresses WHERE LOWER(AddressType) = 'email' AND ValidFrom >= :validFrom"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
@@ -41,7 +41,7 @@
 				<ee:transform doc:name="query expected records with custom dates" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0 output application/json ---
-							" SELECT count(*) total from VCrm_Addresses WHERE AddressType = 'eMail' AND ValidFrom between :start and :end"
+							" SELECT count(*) total from VCrm_Addresses WHERE LOWER(AddressType) = 'email' AND ValidFrom between :start and :end"
 						]]]>
 						</ee:set-variable>
 					</ee:variables>
@@ -62,13 +62,12 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   INNO_ID, ContactID, " ++
-							"   RTRIM(AddressType) as AddressType, " ++
-							"   RTRIM(ZipCode) as ZipCode, " ++
-							"   City, State, CountryCode, primaryaddressflag, " ++
+							"   INNO_ID, ContactID, eMail, " ++
+							"   LOWER(RTRIM(AddressType)) as AddressType, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_Addresses " ++
-							" WHERE AddressType = 'eMail' AND " ++ (
+							" WHERE AddressType = 'email' AND " ++
+							"       eMail != null AND " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
 								else 
@@ -106,12 +105,7 @@
 							payload map (item, value) ->{
 								emailId: 		item.INNO_ID as String,
 								contactId: 		item.ContactID as String,
-								'type': 		trim(item.AddressType),
-								city: 			item.City,
-								state: 			item.State,
-								zipCode: 		item.ZipCode,
-								country: 		item.CountryCode as String,
-								primary: 		if (item.primaryaddressflag != 0) true else false,
+								email: 			item.eMail,
 								date: 			item.ValidFrom
 							}
 							]]>

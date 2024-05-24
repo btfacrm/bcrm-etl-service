@@ -50,7 +50,8 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   CustomerAccountNumber, EndingAccountBalance, " ++
+							"   UPPER(RTRIM(CustomerAccountNumber)) AS CustomerAccountNumber, " ++
+							"   EndingAccountBalance, " ++
 							"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
 							" FROM VCrm_CashBalance_Book  " ++
 							" WHERE " ++ (
@@ -88,7 +89,7 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 	upper(trim(item.CustomerAccountNumber as String)),
+								account: 	item.CustomerAccountNumber as String,
 								balance: 	item.EndingAccountBalance as Number,
 								date: 		item.BalanceValidFrom
 							}

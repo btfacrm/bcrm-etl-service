@@ -49,7 +49,7 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   RTRIM(CustomerAccountNumber_Key) as CustomerAccountNumber_Key, " ++
+							"   UPPER(RTRIM(CustomerAccountNumber_Key)) as CustomerAccountNumber_Key, " ++
 							"   RTRIM(Agency_Code) as Agency_Code, " ++
 							"   RTRIM(AgencyName) as AgencyName, " ++
 							"   RTRIM(Region_Code) as Region_Code, " ++
@@ -94,7 +94,7 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			upper(trim(item.CustomerAccountNumber_Key)),
+								account: 			item.CustomerAccountNumber_Key,
 								(agencyCode: 		item.Agency_Code) if (!isEmpty(item.Agency_Code)),
 								(agencyDescription: item.AgencyName) if (!isEmpty(item.AgencyName)),
 								(regionCode: 		item.Region_Code) if (!isEmpty(item.Region_Code)),

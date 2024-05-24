@@ -50,7 +50,7 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   RTRIM(CustomerAccountNumber_Key) as CustomerAccountNumber_Key, " ++
+							"   UPPER(RTRIM(CustomerAccountNumber_Key)) as CustomerAccountNumber_Key, " ++
 							"   RTRIM(Managed_Agency_Code) as Managed_Agency_Code, " ++
 							"   RTRIM(BirthCert_OnFile) as BirthCert_OnFile, " ++
 							"   RTRIM(Long_Name_Line_5) as Long_Name_Line_5, " ++
@@ -96,7 +96,7 @@
 							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
-								account: 				upper(item.CustomerAccountNumber_Key as String),
+								account: 				item.CustomerAccountNumber_Key as String,
 								distributionExpiration: item.DistPlan_ExpireDate,
 								temporaryCourtOrderExp: item.Temporary_CourtOrder_ExpireDate,
 								birthCertificate: 		if (item.BirthCert_OnFile != 0) true else false,

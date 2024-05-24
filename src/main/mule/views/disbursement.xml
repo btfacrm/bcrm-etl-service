@@ -52,7 +52,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT top " ++ vars.maxRecords as String ++
-							"   RTRIM(CustomerAccountNumber) as CustomerAccountNumber, " ++
+							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
 							"   RTRIM(TransactionNumber) as TransactionNumber, " ++
 							"   RTRIM(TransactionCode) as TransactionCode, " ++
 							"   RTRIM(Status) as Status, " ++
