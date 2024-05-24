@@ -25,6 +25,7 @@ service:
   path:
     contact: "/api/contact"
     address: "/api/address"
+    email: "/api/email"
     phone: "/api/phone"
     account: "/api/account"
     accountudf: "/api/accountudf"

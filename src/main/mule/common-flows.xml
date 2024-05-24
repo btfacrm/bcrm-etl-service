@@ -256,7 +256,10 @@
 			</when>
             <when expression='#[ vars.view == "address" ]'>
 				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.address}" />
-			</when>	
+			</when>
+            <when expression='#[ vars.view == "email" ]'>
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.email}" />
+			</when>		
 			<otherwise>
 				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="this-path-is-not-correct" />
 			</otherwise>
