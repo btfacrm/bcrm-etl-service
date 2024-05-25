@@ -54,7 +54,7 @@
 							"   EndingAccountBalance, " ++
 							"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
 							" FROM VCrm_CashBalance_Book  " ++
-							" WHERE CustomerAccountNumber IN ('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384') AND " ++ (
+							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" BalanceValidFrom >= :validFrom "
 								else 
