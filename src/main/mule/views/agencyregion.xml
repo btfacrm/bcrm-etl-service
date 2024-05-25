@@ -58,7 +58,7 @@
 							"   RTRIM(TribeName) as TribeName, " ++
 							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
 							" FROM Vcrm_RegionAgencyTribe  " ++
-							" WHERE " ++ (
+							" WHERE CustomerAccountNumber_Key IN ('001J005182','001L002384','012J004884','004U000104','001L002384','012U003477','001L002384') AND " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" StartTime > :validFrom "
 								else 
