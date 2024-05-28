@@ -50,12 +50,12 @@
 							---
 							" SELECT " ++
 							"   UPPER(RTRIM(CustomerAccountNumber_Key)) as CustomerAccountNumber_Key, " ++
-							"   TRIM(Agency_Code) as Agency_Code, " ++
-							"   TRIM(AgencyName) as AgencyName, " ++
-							"   TRIM(Region_Code) as Region_Code, " ++
-							"   TRIM(RegionName) as RegionName, " ++
-							"   TRIM(Tribe_Code) as Tribe_Code, " ++
-							"   TRIM(TribeName) as TribeName, " ++
+							"   RTRIM(Agency_Code) as Agency_Code, " ++
+							"   RTRIM(AgencyName) as AgencyName, " ++
+							"   RTRIM(Region_Code) as Region_Code, " ++
+							"   RTRIM(RegionName) as RegionName, " ++
+							"   RTRIM(Tribe_Code) as Tribe_Code, " ++
+							"   RTRIM(TribeName) as TribeName, " ++
 							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
 							" FROM Vcrm_RegionAgencyTribe  " ++
 							" WHERE " ++ (
