@@ -53,7 +53,7 @@
 							"   INNO_ID, " ++
 							"   ContactID, " ++
 							"   PrimaryPhoneNumberFlag, " ++
-							"   RTRIM(PhoneTypeCode) as PhoneTypeCode, " ++				
+							"   LOWER(RTRIM(PhoneTypeCode)) as PhoneTypeCode, " ++				
 							"   RTRIM(PhoneNumber) as PhoneNumber, " ++				
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_ContactPhones " ++
