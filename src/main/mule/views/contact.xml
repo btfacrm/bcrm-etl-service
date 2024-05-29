@@ -64,10 +64,8 @@
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
-								else if (isEmpty(vars.customIds))
-									" ValidFrom between :start and :end "
 								else
-									"ContactID = :id"
+									" ValidFrom between :start and :end "
 							) ++
 							" ORDER BY ValidFrom, ContactID " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
