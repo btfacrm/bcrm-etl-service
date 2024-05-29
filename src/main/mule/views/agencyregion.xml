@@ -29,11 +29,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from Vcrm_RegionAgencyTribe WHERE StartTime > :validFrom" ]' />
+					value='#["SELECT count(*) total from Vcrm_RegionAgencyTribe WHERE ValidFrom > :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(*) total from Vcrm_RegionAgencyTribe WHERE StartTime between :start and :end' ]" />
+					value="#['SELECT count(*) total from Vcrm_RegionAgencyTribe WHERE ValidFrom between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -56,15 +56,15 @@
 							"   RTRIM(RegionName) as RegionName, " ++
 							"   RTRIM(Tribe_Code) as Tribe_Code, " ++
 							"   RTRIM(TribeName) as TribeName, " ++
-							"   FORMAT(StartTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StartTime " ++
+							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM Vcrm_RegionAgencyTribe  " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" StartTime > :validFrom "
+									" ValidFrom > :validFrom "
 								else 
-									" StartTime between :start and :end "
+									" ValidFrom between :start and :end "
 							) ++							
-							" ORDER BY StartTime, CustomerAccountNumber_Key " ++
+							" ORDER BY ValidFrom, CustomerAccountNumber_Key " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
@@ -101,7 +101,7 @@
 								(regionDescription: item.RegionName) if (!isEmpty(item.RegionName)),
 								(tribeCode: 		item.Tribe_Code as String) if (!isEmpty(item.Tribe_Code)),
 								(tribeDescription: 	item.TribeName) if (!isEmpty(item.TribeName)),
-								date: 				trim(item.StartTime)
+								date: 				trim(item.ValidFrom)
 							}
 							]]>
 						</ee:set-payload>
