@@ -60,11 +60,11 @@
 		<set-variable doc:name="get watermark start" variableName="customWatermarkStart" value="#[attributes.queryParams.start as DateTime default '']" />
 		<set-variable doc:name="get watermark end" variableName="customWatermarkEnd" value="#[attributes.queryParams.end as DateTime default '' ]" />
 		<set-variable doc:name="get MaxRecords" variableName="customMaxRecords" value="#[attributes.queryParams.maxrecords as String default '' ]" />
-
+		<set-variable doc:name="get id list" variableName="customId" value="#[attributes.queryParams.id as String default '' ]" />
 		
 		<set-variable doc:name="set isProcessTriggered" variableName="isProcessTriggered" value="#[true]" />
 		<logger doc:name="view" level="INFO" category="app" 
-			message="#['Request execute ETL for : ' ++ vars.view ++ ', start: ' ++ vars.customWatermarkStart ++ ', end: ' ++ vars.customWatermarkEnd]"/>
+			message="#['Request execute ETL for : ' ++ vars.view ++ ', start: ' ++ vars.customWatermarkStart ++ ', end: ' ++ vars.customWatermarkEnd ++ ', id: ' ++ vars.customId]"/>
 
 		<choice doc:name="verify if view is valid" >
             <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address", "email"] contains vars.view ]'>
