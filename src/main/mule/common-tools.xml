@@ -68,7 +68,8 @@
 			<db:input-parameters ><![CDATA[#[{ 
 				validFrom: vars.validFrom,
 				start: vars.customWatermarkStart,
-				end: vars.customWatermarkEnd
+				end: vars.customWatermarkEnd,
+				id: vars.customIds
             }]]]>
 			</db:input-parameters>
 		</db:select>
