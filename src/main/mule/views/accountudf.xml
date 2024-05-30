@@ -71,7 +71,7 @@
 							"           SELECT CustomerAccountNumber_Key  from VCrm_AccountMaster_UDF vamu " ++
 							"           WHERE Age_Of_Majority > '2045' " ++
 							"        ) " ++
-							" ORDER BY StartTime, CustomerAccountNumber_Key " ++
+							" ORDER BY ValidFrom, CustomerAccountNumber_Key " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 							]]]>
