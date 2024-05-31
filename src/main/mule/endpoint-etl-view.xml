@@ -26,35 +26,6 @@
 		http://www.mulesoft.org/schema/mule/cloudhub 
 		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 
-	<flow name="endpoint-etl"> 
-		<cloudhub:create-notification doc:name="Create Notification" config-ref="CloudHub_Config" 
-			domain="${notification.domain}" transactionId="#[correlationId]" priority="${notification.priority}">
-			<cloudhub:message><![CDATA[#["${notification.message.mainetl}"]]]></cloudhub:message>
-			<cloudhub:custom-properties><![CDATA[#[output application/java
-				---
-				{
-					correlationId: correlationId,
-					date: now()
-				}]]]>
-			</cloudhub:custom-properties>
-		</cloudhub:create-notification>
-
-		<ee:transform doc:name="response from watermark" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-					output application/json
-					---
-					{
-						status: 200,
-						message: "The orchestrator ETL run sucessfully",
-						correlationId: correlationId
-					}
-					]]>
-				</ee:set-payload>
-			</ee:message>
-		</ee:transform>		
-	</flow>
-
 	<flow name="endpoint-etl-view">
 		<set-variable doc:name="get view to process" variableName="view" value="#[attributes.uriParams.view]" />
 		<set-variable doc:name="get watermark start" variableName="customWatermarkStart" value="#[attributes.queryParams.start as DateTime default '']" />
