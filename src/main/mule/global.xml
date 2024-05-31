@@ -113,6 +113,7 @@
 			<vm:queue queueName="phone" />
 			<vm:queue queueName="address" />
 			<vm:queue queueName="email" />
+			<vm:queue queueName="tribe" />
 		</vm:queues>
 	</vm:config>
 
