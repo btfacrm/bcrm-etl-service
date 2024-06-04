@@ -66,7 +66,7 @@
 								else
 									" EffectiveDate between :start and :end "
 							) ++
-							" ORDER BY EffectiveDate, ContactID " ++
+							" ORDER BY EffectiveDate, CustomerAccountNumber " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
