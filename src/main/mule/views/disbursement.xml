@@ -49,7 +49,7 @@
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json skipNullOn="everywhere"
 							---
-							" SELECT top " ++ vars.maxRecords as String ++
+							" SELECT " ++
 							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
 							"   RTRIM(TransactionNumber) as TransactionNumber, " ++
 							"   RTRIM(TransactionCode) as TransactionCode, " ++
