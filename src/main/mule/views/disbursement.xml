@@ -29,11 +29,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(DISTINCT CustomerAccountNumber total from VCrm_Disbursement WHERE EffectiveDate >= :validFrom" ]' />
+					value='#["SELECT count(DISTINCT CustomerAccountNumber) total from VCrm_Disbursement WHERE EffectiveDate >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(DISTINCT CustomerAccountNumber total from VCrm_Disbursement WHERE EffectiveDate between :start and :end' ]" />
+					value="#['SELECT count(DISTINCT CustomerAccountNumber) total from VCrm_Disbursement WHERE EffectiveDate between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
