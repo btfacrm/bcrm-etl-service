@@ -22,7 +22,7 @@
 		********************************************************************
 	-->
 	<flow name="queue-tribe">
-		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="balance" timeout="60" timeoutUnit="MINUTES"/>
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="tribe" timeout="60" timeoutUnit="MINUTES"/>
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
 
 		<!-- Get validFrom Watermark -->
@@ -56,7 +56,7 @@
 							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
 							"   EndingAccountBalance, " ++
 							"   FORMAT(BalanceValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS BalanceValidFrom " ++
-							" FROM VCrm_CashBalance_Book  " ++
+							" FROM INVALID_VIEW  " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" BalanceValidFrom >= :validFrom "
@@ -103,7 +103,7 @@
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
 				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
-				<flow-ref name="call-api" doc:name="call api"/>
+				<flow-ref doc:name="call api" name="call-api" />
             </when>
         </choice>
 
@@ -112,7 +112,7 @@
 		
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" >
-				<logger level="INFO" doc:name="Logger" />
+				<flow-ref doc:name="create a notification for the error" name="notify-error" />
 			</on-error-continue>
 		</error-handler>
 	</flow>

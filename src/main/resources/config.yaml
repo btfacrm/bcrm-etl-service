@@ -17,7 +17,7 @@ notification:
   platform: "https://gov.anypoint.mulesoft.com"
   message:
     mainetl: "The main ETL process started sucessfully"
-
+    erroretl: "The ETL process had internal errors"
 
 service:
   protocol: "HTTPS"

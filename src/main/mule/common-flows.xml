@@ -1,12 +1,14 @@
 <mule
     xmlns:os="http://www.mulesoft.org/schema/mule/os"
     xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
     xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/ee/core 
 		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 		http://www.mulesoft.org/schema/mule/core 
@@ -18,7 +20,11 @@
         http://www.mulesoft.org/schema/mule/vm 
 		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
 		http://www.mulesoft.org/schema/mule/os 
-		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/cloudhub 
+		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd		
+		
+		">
 	
 
     <!-- ********************************************* --> 
@@ -273,4 +279,25 @@
 		<flow-ref name="save-status-step2" doc:name="save batch status 2"/>
 
     </sub-flow>
+
+    <sub-flow name="notify-error">
+		<logger level="INFO" doc:name="Logger" message="#['Message description: ' ++ error.description]"/>
+		<logger level="INFO" doc:name="Logger" message="#['Message detailedDescription: ' ++ error.detailedDescription]"/>
+		<logger level="INFO" doc:name="Logger" message="#['Message errorMessage: ' ++ error.errorMessage]"/>
+
+		<cloudhub:create-notification doc:name="Create Notification" config-ref="CloudHub_Config" 
+			domain="${notification.domain}" transactionId="#[correlationId]" priority="${notification.priority}">
+			<cloudhub:message><![CDATA[#["${notification.message.erroretl}" ++ ": " ++ error.description default ""]]]></cloudhub:message>
+			<cloudhub:custom-properties><![CDATA[#[output application/java ---
+				{
+					correlationId: correlationId,
+					date: now(),
+					view: vars.view default "",
+					errorType: (error.errorType.namespace default "") ++ ":" ++ (error.errorType.identifier default "")
+				}
+			]]]>
+			</cloudhub:custom-properties>
+		</cloudhub:create-notification>
+    </sub-flow>
+
 </mule>
