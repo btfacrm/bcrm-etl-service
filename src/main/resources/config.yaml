@@ -18,6 +18,8 @@ notification:
   message:
     mainetl: "The main ETL process started sucessfully"
     erroretl: "The ETL process had internal errors"
+    apiunexpected: "There was an unexpected response message from Salesforce API (bcrm-salesforce-api)"
+    retries: "The retries on the ETL has reached the maximum number"
 
 service:
   protocol: "HTTPS"

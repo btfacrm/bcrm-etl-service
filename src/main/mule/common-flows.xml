@@ -281,8 +281,6 @@
 
     <sub-flow name="notify-error">
 		<logger level="INFO" doc:name="Logger" message="#['Notify. Message description: ' ++ error.description default '']"/>
-		<logger level="INFO" doc:name="Logger" message="#['Notify. Message detailedDescription: ' ++ error.detailedDescription default '']"/>
-		<logger level="INFO" doc:name="Logger" message="#['Notify. Message errorMessage: ' ++ error.errorMessage default ''  ]"/>
 		<logger level="INFO" doc:name="Logger" message="#['Notify. Message errorType: ' ++ (error.errorType.namespace default '') ++ ':' ++ (error.errorType.identifier default '')  ]"/>
 
 		<cloudhub:create-notification doc:name="Create Notification" config-ref="CloudHub_Config" 
