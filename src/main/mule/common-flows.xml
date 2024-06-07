@@ -288,6 +288,7 @@
 			<cloudhub:message><![CDATA[#["${notification.message.erroretl}" ++ ": " ++ error.description default ""]]]></cloudhub:message>
 			<cloudhub:custom-properties><![CDATA[#[output application/java ---
 				{
+					env: vars.env,
 					correlationId: correlationId,
 					date: (now() >> "US/Central") as String {format: "uuuu-MM-dd, KK:mm:ss O"},
 					view: vars.view default "",
