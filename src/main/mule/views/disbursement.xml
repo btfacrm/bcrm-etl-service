@@ -93,13 +93,13 @@
 								disbursementText: 		item.DisbursementText,
 								debitCreditIndicator: 	item.DebitCreditIndicator,
 								amount: 				item.Amount as Number,
-								settleDate: 			item.SettleDate,
+								settleDate: 			item.SettleDate >> "US/Mountain",
 								status: 				item.Status,
 								settleFlag: 			if (item.SettledFlag != 0) true else false,
 								incomeIndicator: 		item.PrincIncomeIndicator,
 								taxCode: 				item.TaxCode,
 								taxYear: 				item.TaxYear,
-								date: 					item.EffectiveDate
+								date: 					item.EffectiveDate >> "US/Mountain"
 							}
 							]]>
 						</ee:set-payload>
