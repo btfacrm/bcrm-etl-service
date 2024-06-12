@@ -49,8 +49,8 @@
 							"   RTRIM(TaxCode) as TaxCode, " ++
 							"   RTRIM(DisbursementText) as DisbursementText,  " ++
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
-							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
-							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
+							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') AS SettleDate, " ++
+							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') AS EffectiveDate " ++
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
@@ -93,13 +93,13 @@
 								disbursementText: 		item.DisbursementText,
 								debitCreditIndicator: 	item.DebitCreditIndicator,
 								amount: 				item.Amount as Number,
-								settleDate: 			item.SettleDate >> "US/Mountain",
+								settleDate: 			item.SettleDate,
 								status: 				item.Status,
 								settleFlag: 			if (item.SettledFlag != 0) true else false,
 								incomeIndicator: 		item.PrincIncomeIndicator,
 								taxCode: 				item.TaxCode,
 								taxYear: 				item.TaxYear,
-								date: 					item.EffectiveDate >> "US/Mountain"
+								date: 					item.EffectiveDate
 							}
 							]]>
 						</ee:set-payload>
