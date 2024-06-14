@@ -54,9 +54,9 @@
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" EffectiveDate >= :validFrom "
+									" EffectiveDate >= FORMAT(:validFrom, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') "
 								else
-									" EffectiveDate between :start and :end "
+									" EffectiveDate between FORMAT(:start, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') and FORMAT(:end, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') "
 							) ++
 							" ORDER BY EffectiveDate, CustomerAccountNumber " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
