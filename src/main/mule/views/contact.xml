@@ -70,12 +70,11 @@
 				<flow-ref name="mssql-main-query" doc:name="query main db"/>
 			</when>
 			<otherwise>
-				<!-- There is no data to process, initializing varialbes for next steps-->
-				<set-variable doc:name="initialized processed records" variableName="recordsProcessed" value="#[0]"/>
+				<!-- There is no data to process, initializing variables for next steps-->
+				<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value="#[0]" />
 				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
 			</otherwise>
 		</choice>
-
 
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.recordsProcessed > 0 ]'>
@@ -109,6 +108,7 @@
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
 				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
+				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>

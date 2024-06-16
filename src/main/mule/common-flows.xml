@@ -3,27 +3,16 @@
     xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
 	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
     xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-		http://www.mulesoft.org/schema/mule/ee/core 
-		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
-		http://www.mulesoft.org/schema/mule/core 
-		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-        http://www.mulesoft.org/schema/mule/http
-        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
-		http://www.mulesoft.org/schema/mule/db 
-		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-        http://www.mulesoft.org/schema/mule/vm 
-		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
-		http://www.mulesoft.org/schema/mule/os 
-		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
-		http://www.mulesoft.org/schema/mule/cloudhub 
-		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
-		">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/ee/core 	http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/db 			http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+        http://www.mulesoft.org/schema/mule/vm 			http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 			http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/cloudhub 	http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 	
 
     <!-- ********************************************* --> 
@@ -36,7 +25,7 @@
 				<flow-ref name="save-status-step3" doc:name="save batch status 3"/>
 				<flow-ref name="mssql-main-query" doc:name="query main db"/>
 				<set-variable doc:name="query expected records" variableName="expectedRecords" value="#[payload[0].total]"/>
-				<logger doc:name="expected records" level="INFO" category="app" message="#['Expected records to process: ' ++ vars.expectedRecords as String]"/>
+				<!-- <logger doc:name="expected records" level="INFO" category="app" message="#['Expected records to process: ' ++ vars.expectedRecords as String]"/> -->
 			</when>
 		</choice>
     </sub-flow>
@@ -61,19 +50,20 @@
         <flow-ref name="mssql-watermark-query"/>
 
 		<set-variable doc:name="set validFrom" variableName="validFrom" value="#[payload[0].LastExecution as String]" />
-		<logger level="INFO" category="app" message="#['Watermark validFrom: ' ++ vars.validFrom]" />
+		<!-- <logger level="INFO" category="app" message="#['Watermark validFrom: ' ++ vars.validFrom]" /> -->
     </sub-flow>
 
 	<sub-flow name="update-watermark-results">
-        <logger level="INFO" category="app" message="#['Analisys for watermark update, httpstatus: ' ++ vars.httpStatus]" />
+        <!-- <logger level="INFO" category="app" message="#['Analisys for watermark update, httpstatus: ' ++ vars.httpStatus]" /> -->
+		<set-variable doc:name="set lastRecordDateString" variableName="lastRecordDateString" value="#['']"/>
+
         <choice doc:name="verify http call" >
             <when expression='#[ vars.httpStatus != 200 ]'>
 				<!-- There was an error in Salesforce API, last execution is the first element in the input payload -->
-                <logger level="INFO" category="app" message="#['Watermark: There was an error in the Salesforce API']" />
-				<set-variable doc:name="httpStatus" variableName="httpStatus" value="#[500]"/>
+                <!-- <logger level="INFO" category="app" message="#['Watermark: There was an error in the Salesforce API']" /> -->
 				<set-variable doc:name="lastExecution" variableName="lastExecution" value="#[vars.firstElementDate]"/>
-				<set-variable doc:name="set lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
-				<ee:transform doc:name="query update watermark" >
+				<set-variable doc:name="lastErrorResponse" variableName="lastErrorResponse" value='#[write(vars.httpMessage, "application/json")]'  />
+				<ee:transform doc:name="update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
 							output application/json
@@ -92,7 +82,31 @@
             </when>
 			<otherwise>
 				<!-- A successfull call to Salesforce API -->
-				<logger level="INFO" category="app" message="#['Watermark: Success call to Salesforce API']" />
+
+				<!-- lastExecution variable depends if there were records processed during the batch -->
+
+				<choice doc:name="Were there records to process for API?" >
+            		<when expression='#[ isEmpty(vars.lastRecordDate) ]'>
+						<!-- No records sent to API, then the lastExecution will not have any changes -->
+						<set-variable doc:name="lastExecution" variableName="lastExecution" value="#[vars.validFrom]"/>
+					</when>
+					<otherwise>
+						<!-- lastExecution will be the last record validFrom plus 1 millisecond -->
+						<ee:transform doc:name="set lastExecution" >
+							<ee:variables >
+								<ee:set-variable variableName="lastExecution"><![CDATA[#[ %dw 2.0
+									import * from dw::util::Coercions
+									output application/java
+									---
+									toDateTime( (toNumber(vars.lastRecordDate as DateTime, "milliseconds") + 5 ), "milliseconds")
+								]]]>
+								</ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<set-variable doc:name="set lastRecordDateString" variableName="lastRecordDateString" value="#[vars.lastRecordDate as String {format: 'yyyy-MM-dd HH:mm:ss:SSS'}]"/>
+					</otherwise>
+				</choice>
+
 				<ee:transform doc:name="query update watermark" >
 					<ee:variables >
 						<ee:set-variable variableName="query"><![CDATA[#[ %dw 2.0
@@ -107,8 +121,13 @@
 						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
+
 			</otherwise>
-        </choice>     
+        </choice>
+
+		<set-variable doc:name="set finalTotalRecords" variableName="finalTotalRecords" value='#[output application/java --- vars.recordsProcessed + vars.totalRecords ]' />
+		<logger level="INFO" category="app" 
+			message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', finished. lastRecordDate: ' ++ vars.lastRecordDateString ++ ', lastExecution: ' ++ vars.lastExecution ++ ', total records: ' ++ (vars.finalTotalRecords as String) ]" />
 
         <flow-ref name="mssql-watermark-update"/>
 	</sub-flow>
@@ -118,7 +137,7 @@
 
         <choice doc:name="determine how to route the flow" >
             <when expression='#[vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200 and isEmpty(vars.customWatermarkStart)]'>
-				<logger doc:name="payload" level="INFO" category="app" message="#['Trigger a new batch process to find more records']"/>
+				<logger level="INFO" category="app" message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', create message for new batch']" />
 				<vm:publish queueName="#[vars.view]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
 					<vm:content ><![CDATA[#[%dw 2.0
 						output application/json
@@ -131,6 +150,7 @@
 							batchNumber: vars.batchNumber,
 							offset: vars.offset + vars.maxRecords,
 							totalRecords: vars.totalRecords + vars.maxRecords,
+							lastRecordDate: vars.lastRecordDate,
 							apiResponseHistory: vars.apiResponseHistory +
 								{	
 									batchNumber : vars.batchNumber,
@@ -143,7 +163,7 @@
 				</vm:publish>				
             </when>
             <otherwise>
-                <logger doc:name="payload" level="INFO" category="app" message="#['Finish processing, add current batch']"/>
+				<!-- <logger level="INFO" category="app" message="#[output application/java - 'ETL: ' ++ vars.view ++ ', finished']" /> -->
 				<ee:transform doc:name="build the service response message">
 					<ee:message>
 					</ee:message>
@@ -225,6 +245,8 @@
 		<set-variable doc:name="set customWatermarkStart" variableName="customWatermarkStart" value="#[payload.customWatermarkStart]" />
 		<set-variable doc:name="set customWatermarkEnd" variableName="customWatermarkEnd" value="#[payload.customWatermarkEnd]" />
 		<set-variable doc:name="set customMaxRecords" variableName="customMaxRecords" value="#[payload.customMaxRecords]" />
+		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value="#[0]" />
+		<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value="#[payload.lastRecordDate]" />
 
 		<choice doc:name="query view?" >
             <when expression='#[ isEmpty(vars.customMaxRecords)]'>
@@ -235,7 +257,7 @@
 			</otherwise>
 		</choice>
 		<logger level="INFO" category="app" 
-			message="#[output application/java --- 'Executing queue for view: ' ++ vars.view ++ ', current batch: ' ++ vars.batchNumber ++ ', offset:' ++ vars.offset ++  ', records x batch: ' ++ vars.maxRecords ++ ', expected records: ' ++ vars.expectedRecords]" />
+			message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', batch: ' ++ vars.batchNumber ++ ', expected: ' ++ vars.expectedRecords ++ ', offset:' ++ vars.offset]" />
 
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.view == "contact" ]'>

@@ -95,6 +95,7 @@
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
 				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
+				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].date]'  />
 				<flow-ref doc:name="call api" name="call-api" />
             </when>
         </choice>

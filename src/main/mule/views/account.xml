@@ -79,7 +79,7 @@
 			</when>
 			<otherwise>
 				<!-- There is no data to process, initializing varialbes for next steps-->
-				<set-variable doc:name="initialized processed records" variableName="recordsProcessed" value="#[0]"/>
+				<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value="#[0]" />
 				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
 			</otherwise>
 		</choice>
@@ -116,8 +116,8 @@
 								(line2: 			  trim(item.CustomerDescriptionLine2 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine2)),
 								(line3: 			  trim(item.CustomerDescriptionLine3 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine3)),
 								(line4: 			  trim(item.CustomerDescriptionLine4 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine4)),
-								date: 				  item.ValidFrom,
-								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime))
+								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime)),
+								date: 				  item.ValidFrom
 							}
 							]]>
 						</ee:set-payload>
@@ -126,6 +126,7 @@
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
 				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
+				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>

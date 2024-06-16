@@ -44,8 +44,8 @@
 							---
 							{
 								status: 200,
-								message: "The ETL process finished, getting response from watermark",
-								etlStatus: if ( !isEmpty(payload) ) payload.watermark.apiResponse else {}
+								message: p('response.service-finished'),
+								watermark: if ( !isEmpty(payload) ) payload.watermark else {}
 							}
 							]]>
 						</ee:set-payload>
@@ -60,7 +60,7 @@
 							---
 							{
 								status: 200,
-								message: "The service is still processing",
+								message: p('response.service-still-processing'),
 								etlStatus: vars.etlMemoryStatus
 							}
 							]]>

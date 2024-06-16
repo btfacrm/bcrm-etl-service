@@ -1,48 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <mule 
 	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" 
 	xmlns:os="http://www.mulesoft.org/schema/mule/os" 
 	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" 
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
-	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 	xsi:schemaLocation="
-		http://www.mulesoft.org/schema/mule/core 
-		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-		http://www.mulesoft.org/schema/mule/ee/core 
-		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-		http://www.mulesoft.org/schema/mule/http
-		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-		http://www.mulesoft.org/schema/mule/vm
-		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
-		http://www.mulesoft.org/schema/mule/os 
-		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
-		http://www.mulesoft.org/schema/mule/mule-apikit 
-		http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  
-		http://www.mulesoft.org/schema/mule/cloudhub 
-		http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
-
-	<flow name="scheduler-contact">
-  		<scheduler doc:name="contact orchestrator" disallowConcurrentExecution="true">
-    		<scheduling-strategy>
-    			<fixed-frequency frequency="30" timeUnit="MINUTES" startDelay="5"/>
-    		</scheduling-strategy>
-  		</scheduler>
-		<logger level="INFO" category="app" 
-			message="#[output application/java --- 'Executing contact orchestrator: this is only a test message']" />
-	</flow>
+		http://www.mulesoft.org/schema/mule/core 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/ee/core 	http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+		http://www.mulesoft.org/schema/mule/vm 			http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+		http://www.mulesoft.org/schema/mule/os 			http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+		http://www.mulesoft.org/schema/mule/cloudhub 	http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 
 	<flow name="scheduler-account">
   		<scheduler doc:name="account orchestrator" disallowConcurrentExecution="true">
     		<scheduling-strategy>
-    			<fixed-frequency frequency="60" timeUnit="MINUTES" startDelay="10"/>
+    			<fixed-frequency frequency="30" timeUnit="MINUTES" startDelay="10"/>
     		</scheduling-strategy>
   		</scheduler>
-		<logger level="INFO" category="app" 
-			message="#[output application/java --- 'Executing account orchestrator: this is only a test message']" />
+		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
 	</flow>
+
+	<flow name="scheduler-contact">
+		
+  		<scheduler doc:name="contact orchestrator" disallowConcurrentExecution="true">
+    		<scheduling-strategy>
+    			<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1"/>
+    		</scheduling-strategy>
+  		</scheduler>
+
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="contact" />
+		<ee:transform doc:name="set view to process" >
+    		<ee:message>
+				<ee:set-attributes><![CDATA[%dw 2.0
+				output application/json
+				---
+				{
+					uriParams:{
+						view: vars.orchestrator
+					}
+				}
+				]]></ee:set-attributes>
+    		</ee:message>
+		</ee:transform>
+
+		<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
+	</flow>
+
+
+    <sub-flow name="execute-orchestrator" doc:name="execute orchestrator">
+
+		<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started']" />
+		<flow-ref doc:name="execute ETL" name="endpoint-etl-view" />
+
+		<!-- Verify if the  ETL started successfully? -->
+		<choice doc:name="service started ?" >
+			<when expression='#[ payload.status == 200 ]'>
+
+				<!-- The ETL started successfully, now check the status of the ETL job -->
+				<try doc:name="verify job status">
+
+					<!-- Maximum 7 minutes for about 44,00 conctact updates, verification every 30 seconds -->
+					<until-successful doc:name="until sucess" maxRetries="20" millisBetweenRetries="30000">
+						<ee:transform doc:name="set view to process" >
+							<ee:message>
+								<ee:set-attributes><![CDATA[%dw 2.0
+								output application/json
+								---
+								{
+									uriParams:{
+										view: vars.orchestrator
+									}
+								}
+								]]></ee:set-attributes>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="call contact status" name="endpoint-etl-status" />
+
+						<!-- <logger level="INFO" category="app" message="#[output application/json - payload]" /> -->
+						
+						<choice doc:name="service still processing?" >
+							<when expression='#[ payload.message == "${response.service-finished}" ]'>
+								<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Process finished']" />
+
+								<choice doc:name="etl success?" >
+									<when expression='#[ payload.watermark.apiResponse.status == 200 ]'>
+										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Success']" />
+									</when>
+									<otherwise>
+										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Failure']" />
+
+										<!-- Verify if a notification is needed -->
+										<choice doc:name="send notification ?" >
+
+											<!-- Missing primary keys are permited but only 1 retry-->
+											<when expression='#[ (write(payload.watermark.apiResponse, "application/json")) contains( "Foreign key external") ]'>
+												<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Missing foreing keys found']" />
+
+												<!-- Verify the number of retries -->
+												<choice doc:name="more than 1 retry?" >
+													<when expression='#[ payload.watermark.retries > 1 ]'>
+														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. More than one retry, a notification will be sent']" />
+													</when>
+												</choice> 	
+											</when>
+
+											<otherwise>
+												<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Unexpected error, a notification will be sent']" />
+											</otherwise>
+										</choice>	
+
+									</otherwise>
+								</choice>	
+							</when>
+							<otherwise>
+								<logger doc:name="attempt" level="INFO" 
+									message="#[output application/java --- 'Orchestrator ' ++ vars.orchestrator ++ '. Still processing, view: ' ++ vars.view ++ ', batch: ' ++ (payload.etlStatus.currentBatchMetadata.batchNumber as String) ++ ', expected: ' ++ (payload.etlStatus.currentBatchMetadata.expectedRecords as String) ++ ', offset: ' ++ (payload.etlStatus.currentBatchMetadata.offset as String)]"/>
+								<raise-error doc:name="Raise error" type="MULE:CONNECTIVITY" description="The ETL is still processing"/>
+							</otherwise>
+						</choice>
+					</until-successful>
+					<error-handler>
+						<on-error-continue enableNotifications="true" logException="false" />
+					</error-handler>
+				</try>
+
+				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Next steps are going to be implemented......']" />
+
+			</when>
+			<otherwise>
+				<!-- ETL not started, send notification -->
+				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Orchestrator not started, a notification will be sent']" />
+
+			</otherwise>
+		</choice>
+
+    </sub-flow>
 </mule>

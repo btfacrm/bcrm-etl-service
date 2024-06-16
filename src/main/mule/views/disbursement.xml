@@ -70,7 +70,7 @@
 			</when>
 			<otherwise>
 				<!-- There is no data to process, initializing varialbes for next steps-->
-				<set-variable doc:name="initialized processed records" variableName="recordsProcessed" value="#[0]"/>
+				<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value="#[0]" />
 				<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
 			</otherwise>
 		</choice>

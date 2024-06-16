@@ -21,7 +21,7 @@
 		
 		<set-variable doc:name="set isProcessTriggered" variableName="isProcessTriggered" value="#[true]" />
 		<logger doc:name="view" level="INFO" category="app" 
-			message="#['Request execute ETL for : ' ++ vars.view ++ ', start: ' ++ vars.customWatermarkStart ++ ', end: ' ++ vars.customWatermarkEnd ++ ', id: ' ++ vars.customId]"/>
+			message="#['Request ETL, view: ' ++ vars.view ++ ', start: ' ++ vars.customWatermarkStart ++ ', end: ' ++ vars.customWatermarkEnd ++ ', id: ' ++ vars.customId]"/>
 
 		<choice doc:name="verify if view is valid" >
             <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address", "email", "tribe"] contains vars.view ]'>
@@ -51,6 +51,7 @@
 										batchNumber: 0,
 										totalRecords: 0,
 										startDate: now(),
+										lastRecordDate: '',
 										apiResponseHistory:[
 											],
 										lastApiInputPayload:{}

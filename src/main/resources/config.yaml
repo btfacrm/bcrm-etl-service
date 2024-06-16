@@ -20,6 +20,10 @@ notification:
     erroretl: "The ETL process had internal errors"
     apiunexpected: "There was an unexpected response message from Salesforce API (bcrm-salesforce-api)"
     retries: "The retries on the ETL has reached the maximum number"
+response:
+  service-still-processing: "The service is still processing"
+  service-finished: "The ETL process finished, getting response from watermark"
+
 
 service:
   protocol: "HTTPS"

@@ -1,54 +1,37 @@
 <mule
-    xmlns:os="http://www.mulesoft.org/schema/mule/os"
-    xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
     xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" 
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
-		http://www.mulesoft.org/schema/mule/ee/core 
-		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
-		http://www.mulesoft.org/schema/mule/core 
-		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-        http://www.mulesoft.org/schema/mule/http
-        http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
-		http://www.mulesoft.org/schema/mule/db 
-		http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-        http://www.mulesoft.org/schema/mule/vm 
-		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
-		http://www.mulesoft.org/schema/mule/os 
-		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+		http://www.mulesoft.org/schema/mule/ee/core		http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+		http://www.mulesoft.org/schema/mule/core 		http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http		http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+		http://www.mulesoft.org/schema/mule/db 			http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	
-
-	<!-- ********************************************* --> 
-	<!-- Database operations -->
-	<!-- ********************************************* --> 
+	<!-- Common tools: database operations, HTTP client, etc. -->
 
     <sub-flow name="mssql-watermark-update">
-        <!-- <logger doc:name="sql update" level="INFO" category="app" message="#['Update sql: ' ++ vars.query]"/> -->
-        <logger doc:name="sql update" level="INFO" category="app" message="#['Update watermark']"/>
+        <!-- <logger doc:name="sql update" level="INFO" category="app" message="#['Watermark Update, sql: ' ++ vars.query]"/> -->
 
 		<db:update doc:name="sqlserver update" config-ref="Database_Config_Watermark">
             <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{ 
-				validFrom: vars.validFrom,
 				lastErrorResponse: vars.lastErrorResponse,
-				lastErrorDate: now() as String {format: "yyyy/MM/dd HH:mm:ss"},
-				lastExecution: vars.lastExecution,
+				lastErrorDate: now() as String {format: "yyyy-MM-dd HH:mm:ss:SSS"},
+				lastExecution: vars.lastExecution as String {format: "yyyy-MM-dd HH:mm:ss:SSS"},
 				apiResponse: write(vars.batchResponse, "application/json") 
             }]]]></db:input-parameters>
 		</db:update>
 	</sub-flow>
 
 	<sub-flow name="mssql-watermark-query">
-        <!-- <logger doc:name="sql query" level="INFO" category="app" message="#['watermark db query: ' ++ vars.query]"/> -->
-        <logger doc:name="sql update" level="INFO" category="app" message="#['Query watermark']"/>
+        <!-- <logger doc:name="sql query" level="INFO" category="app" message="#['Watermark Query, sql: ' ++ vars.query]"/> -->
 
         <db:select doc:name="database watermark" config-ref="Database_Config_Watermark">
             <db:sql><![CDATA[#[ vars.query ]]]></db:sql>
             <db:input-parameters ><![CDATA[#[{ 
-                validFrom: vars.validFrom
             }]]]>
             </db:input-parameters>
         </db:select>
@@ -60,9 +43,9 @@
 
 	<sub-flow name="mssql-main-query">
         <!-- <logger doc:name="sql query" level="INFO" category="app" message="#['main db query: ' ++ vars.query]"/> -->
-		<logger level="INFO" category="app" 
-			message="#[output application/java --- 'Query main db, validFrom: ' ++ vars.validFrom ++ ', custom start/end: ' ++ if (!isEmpty(vars.customWatermarkStart)) 'true' else 'false']" />
-
+		<!-- <logger level="INFO" category="app" 
+			message="#[output application/java - 'Query main db, validFrom: ' ++ vars.validFrom ++ ', custom start/end: ' ++ if (!isEmpty(vars.customWatermarkStart)) 'true' else 'false']" />
+		-->
 		<db:select doc:name="database main" config-ref="Database_Config_Main">
 			<db:sql><![CDATA[#[ vars.query ]]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{ 
@@ -73,8 +56,7 @@
 			</db:input-parameters>
 		</db:select>
 		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload)) sizeOf(payload) else 0]'  />
-		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
-		<logger doc:name="num records" level="INFO" category="app" message="#['Records from main db: ' ++ (vars.recordsProcessed as String) ]"/>
+		<!-- <logger doc:name="num records" level="INFO" category="app" message="#['Records from main db: ' ++ (vars.recordsProcessed as String) ]"/> -->
         
         <!-- if the response from database is empty then an error is raised when finish the execution of the flow/queue. 
             Just by publishing a message to queue is not sufficient to set the payload. The payload must be
@@ -93,10 +75,9 @@
 	<!-- ********************************************* --> 
 
 	<flow name="call-api">
-		<logger doc:name="call POST" level="INFO" category="app" 
-			message='#[ "Call POST method, path: " ++ vars.servicePath ++ ", statusValidator: " ++ (vars.statusValidator as String) ]' />
 
-		<!-- <logger doc:name="payload" level="INFO" category="app" message="#[payload]"/> -->
+		<logger doc:name="call POST" level="INFO" category="app" message='#[output application/java --- "ETL: " ++ vars.view ++ ", API path: " ++ vars.servicePath ++ ", payload size: " ++ ( sizeOf(payload) as String) ++ ", validFrom: " ++ vars.validFrom ]' />
+
 		<set-variable doc:name="set apiInputPayload" variableName="apiInputPayload" value='#[payload]'  />
 
 		<http:request config-ref="HTTP_Request_Configuration" 
@@ -114,7 +95,7 @@
 		</http:request>
 
 		<!-- <logger doc:name="response" level="INFO" message='#[payload]' /> -->
-		<logger doc:name="status code" level="INFO" message='#["Response status code: " ++ (attributes.statusCode as String)]' />
+		<!-- <logger doc:name="status code" level="INFO" message='#["Response status code: " ++ (attributes.statusCode as String)]' />  -->
 		<set-variable doc:name="set httpStatus" variableName="httpStatus" value='#[200]'  />
 		<set-variable doc:name="set httpMessage" variableName="httpMessage" value='#[payload]'/>
 
