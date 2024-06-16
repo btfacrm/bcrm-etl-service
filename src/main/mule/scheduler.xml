@@ -27,7 +27,7 @@
 		
   		<scheduler doc:name="contact orchestrator" disallowConcurrentExecution="true">
     		<scheduling-strategy>
-    			<fixed-frequency frequency="5" timeUnit="MINUTES" startDelay="1"/>
+    			<fixed-frequency frequency="10" timeUnit="MINUTES" startDelay="1"/>
     		</scheduling-strategy>
   		</scheduler>
 
