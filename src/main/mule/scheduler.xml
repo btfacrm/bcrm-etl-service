@@ -17,7 +17,7 @@
 	<flow name="scheduler-account">
   		<scheduler doc:name="account orchestrator" disallowConcurrentExecution="true">
     		<scheduling-strategy>
-    			<fixed-frequency frequency="30" timeUnit="MINUTES" startDelay="10"/>
+    			<fixed-frequency frequency="25" timeUnit="MINUTES" startDelay="10"/>
     		</scheduling-strategy>
   		</scheduler>
 		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
@@ -46,21 +46,21 @@
 		<choice doc:name="process view address? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<flow-ref name="set-view-address" />
-				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started. Testing not yet implemented']" />
+				<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
 			</when>
 		</choice>
 
 		<choice doc:name="process view email? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<flow-ref name="set-view-email" />
-				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started. Testing not yet implemented']" />
+				<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
 			</when>
 		</choice>
 
 		<choice doc:name="process view phone? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<flow-ref name="set-view-phone" />
-				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started. Testing not yet implemented']" />
+				<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
 			</when>
 		</choice>
 
