@@ -301,27 +301,4 @@
 
     </sub-flow>
 
-    <sub-flow name="notify-error">
-		<logger level="INFO" doc:name="Logger" message="#['Notify. Message description: ' ++ error.description default '']"/>
-		<logger level="INFO" doc:name="Logger" message="#['Notify. Message errorType: ' ++ (error.errorType.namespace default '') ++ ':' ++ (error.errorType.identifier default '')  ]"/>
-
-		<cloudhub:create-notification doc:name="Create Notification" config-ref="CloudHub_Config" 
-			domain="${notification.domain}" transactionId="#[correlationId]" priority="${notification.priority}">
-			<cloudhub:message><![CDATA[#["${notification.message.erroretl}" ++ ": " ++ error.description default ""]]]></cloudhub:message>
-			<cloudhub:custom-properties><![CDATA[#[output application/java ---
-				{
-					env: vars.env,
-					correlationId: correlationId,
-					date: (now() >> "US/Central") as String {format: "uuuu-MM-dd, KK:mm:ss O"},
-					view: vars.view default "",
-					errorType: (error.errorType.namespace default "") ++ ":" ++ (error.errorType.identifier default "")
-				}
-			]]]>
-			</cloudhub:custom-properties>
-		</cloudhub:create-notification>
-
-		<!-- Remove the execution message, so the view can be called again -->
-		<os:remove doc:name="Remove" key="#[vars.view]" objectStore="Object_store"/>
-    </sub-flow>
-
 </mule>

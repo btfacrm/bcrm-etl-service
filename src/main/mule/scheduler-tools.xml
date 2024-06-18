@@ -8,15 +8,60 @@
 		http://www.mulesoft.org/schema/mule/core 	http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/os 		http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	
-    <sub-flow name="set-view-account" doc:name="set view account">
-		<ee:transform doc:name="set view account" >
+    <sub-flow name="set-view-contact">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="contact" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-address">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="address" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-email">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="email" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-phone">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="phone" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-account">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="account" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-balance">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="balance" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-disbursement">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="disbursement" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-accountudf">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="accountudf" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+    <sub-flow name="set-view-agencyregion">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="agencyregion" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
+
+	<sub-flow name="set-view-for-orchestrator" >
+		<ee:transform doc:name="set view to process" >
     		<ee:message>
 				<ee:set-attributes><![CDATA[%dw 2.0
 				output application/json
 				---
 				{
 					uriParams:{
-						view: 'account'
+						view: vars.orchestrator
 					}
 				}
 				]]></ee:set-attributes>
@@ -24,19 +69,4 @@
 		</ee:transform>
     </sub-flow>
 
-    <sub-flow name="set-view-contact" doc:name="set view contact">
-		<ee:transform doc:name="set view contact" >
-    		<ee:message>
-				<ee:set-attributes><![CDATA[%dw 2.0
-				output application/json
-				---
-				{
-					uriParams:{
-						view: 'contact'
-					}
-				}
-				]]></ee:set-attributes>
-    		</ee:message>
-		</ee:transform>
-    </sub-flow>
 </mule>

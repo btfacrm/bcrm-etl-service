@@ -137,7 +137,7 @@
 		<!-- Any error during execution will be notified in Anypoint Platform, then an alert will send an email to the administrators -->
 		<error-handler >
 			<on-error-continue doc:name="on error continue" enableNotifications="true" logException="true" >
-				<flow-ref doc:name="create cloudhub notification" name="notify-error" />
+				<flow-ref doc:name="create cloudhub notification" name="notify-database-error" />
 			</on-error-continue>
 		</error-handler>
 	</flow>

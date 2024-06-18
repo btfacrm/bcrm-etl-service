@@ -21,6 +21,11 @@
     		</scheduling-strategy>
   		</scheduler>
 		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
+
+		<!-- Maximum 90 minutes for about 500,000 account updates, verification every 1 minute -->
+		<set-variable doc:name="set untilMaxRetries" variableName="untilMaxRetries" value="#[90]" />
+		<set-variable doc:name="set untilMillisBetweenRetries" variableName="untilMillisBetweenRetries" value="#[60000]" />
+
 	</flow>
 
 	<flow name="scheduler-contact">
@@ -31,24 +36,35 @@
     		</scheduling-strategy>
   		</scheduler>
 
-		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="contact" />
-		<ee:transform doc:name="set view to process" >
-    		<ee:message>
-				<ee:set-attributes><![CDATA[%dw 2.0
-				output application/json
-				---
-				{
-					uriParams:{
-						view: vars.orchestrator
-					}
-				}
-				]]></ee:set-attributes>
-    		</ee:message>
-		</ee:transform>
-
+		<!-- Maximum 7 minutes for about 44,00 conctact updates, verification every 30 seconds -->
+		<set-variable doc:name="set untilMaxRetries" variableName="untilMaxRetries" value="#[20]" />
+		<set-variable doc:name="set untilMillisBetweenRetries" variableName="untilMillisBetweenRetries" value="#[30000]" />
+		<flow-ref name="set-view-contact" />
+		<set-variable doc:name="set processNextView" variableName="processNextView" value="#[false]" />
 		<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
-	</flow>
 
+		<choice doc:name="process view address? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<flow-ref name="set-view-address" />
+				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started. Testing not yet implemented']" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view email? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<flow-ref name="set-view-email" />
+				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started. Testing not yet implemented']" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view phone? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<flow-ref name="set-view-phone" />
+				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started. Testing not yet implemented']" />
+			</when>
+		</choice>
+
+	</flow>
 
     <sub-flow name="execute-orchestrator" doc:name="execute orchestrator">
 
@@ -62,8 +78,7 @@
 				<!-- The ETL started successfully, now check the status of the ETL job -->
 				<try doc:name="verify job status">
 
-					<!-- Maximum 7 minutes for about 44,00 conctact updates, verification every 30 seconds -->
-					<until-successful doc:name="until sucess" maxRetries="20" millisBetweenRetries="30000">
+					<until-successful doc:name="until sucess" maxRetries="#[vars.untilMaxRetries]" millisBetweenRetries="#[vars.untilMillisBetweenRetries]">
 						<ee:transform doc:name="set view to process" >
 							<ee:message>
 								<ee:set-attributes><![CDATA[%dw 2.0
@@ -83,32 +98,35 @@
 						
 						<choice doc:name="service still processing?" >
 							<when expression='#[ payload.message == "${response.service-finished}" ]'>
-								<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Process finished']" />
 
 								<choice doc:name="etl success?" >
 									<when expression='#[ payload.watermark.apiResponse.status == 200 ]'>
-										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Success']" />
+										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Process finished successfully']" />
 									</when>
 									<otherwise>
-										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Failure']" />
-
 										<!-- Verify if a notification is needed -->
 										<choice doc:name="send notification ?" >
 
 											<!-- Missing primary keys are permited but only 1 retry-->
 											<when expression='#[ (write(payload.watermark.apiResponse, "application/json")) contains( "Foreign key external") ]'>
-												<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Missing foreing keys found']" />
 
 												<!-- Verify the number of retries -->
 												<choice doc:name="more than 1 retry?" >
 													<when expression='#[ payload.watermark.retries > 1 ]'>
 														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. More than one retry, a notification will be sent']" />
+														<set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.multiple-retries}" />
+														<flow-ref doc:name="call contact status" name="notify-orchestrator" />
 													</when>
+													<otherwise>
+														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Missing foreing keys, with one retry this condition is accepted']" />
+													</otherwise>
 												</choice> 	
 											</when>
 
 											<otherwise>
 												<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Unexpected error, a notification will be sent']" />
+												<set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.unexpected-error}" />
+												<flow-ref doc:name="call contact status" name="notify-orchestrator" />
 											</otherwise>
 										</choice>	
 
@@ -126,14 +144,15 @@
 						<on-error-continue enableNotifications="true" logException="false" />
 					</error-handler>
 				</try>
-
-				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Next steps are going to be implemented......']" />
+				<set-variable doc:name="set processNextView" variableName="processNextView" value="#[true]" />
+				<!-- <logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Next steps are going to be implemented......']" /> -->
 
 			</when>
 			<otherwise>
 				<!-- ETL not started, send notification -->
 				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Orchestrator not started, a notification will be sent']" />
-
+		        <set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.not-started}" />
+				<flow-ref doc:name="call contact status" name="notify-orchestrator" />
 			</otherwise>
 		</choice>
 

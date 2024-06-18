@@ -20,6 +20,10 @@ notification:
     erroretl: "The ETL process had internal errors"
     apiunexpected: "There was an unexpected response message from Salesforce API (bcrm-salesforce-api)"
     retries: "The retries on the ETL has reached the maximum number"
+  orchestrator:
+    multiple-retries: "The orchestrator found missing keys which may be acceptable, but the ETL process has more than one retries."
+    unexpected-error: "The orchestator found an unexpected error."
+    not-started: "The orchestrator didn't start because another instance is running."
 response:
   service-still-processing: "The service is still processing"
   service-finished: "The ETL process finished, getting response from watermark"
