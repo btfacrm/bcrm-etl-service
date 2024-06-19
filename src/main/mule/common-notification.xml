@@ -40,7 +40,7 @@
 			<cloudhub:message><![CDATA[#[ vars.orchestratorMessage ]]]></cloudhub:message>
 			<cloudhub:custom-properties><![CDATA[#[output application/java ---
 				{
-					env: vars.env,
+					env: p('env') default "local",
 					correlationId: correlationId,
 					date: (now() >> "US/Central") as String {format: "uuuu-MM-dd, KK:mm:ss O"},
 					view: vars.view default ""
