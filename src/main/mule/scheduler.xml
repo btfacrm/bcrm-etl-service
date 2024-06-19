@@ -14,20 +14,6 @@
 		http://www.mulesoft.org/schema/mule/os 			http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 		http://www.mulesoft.org/schema/mule/cloudhub 	http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 
-	<flow name="scheduler-account">
-  		<scheduler doc:name="account orchestrator" disallowConcurrentExecution="true">
-    		<scheduling-strategy>
-    			<fixed-frequency frequency="25" timeUnit="MINUTES" startDelay="10"/>
-    		</scheduling-strategy>
-  		</scheduler>
-		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
-
-		<!-- Maximum 90 minutes for about 500,000 account updates, verification every 1 minute -->
-		<set-variable doc:name="set untilMaxRetries" variableName="untilMaxRetries" value="#[90]" />
-		<set-variable doc:name="set untilMillisBetweenRetries" variableName="untilMillisBetweenRetries" value="#[60000]" />
-
-	</flow>
-
 	<flow name="scheduler-contact">
 		
   		<scheduler doc:name="contact orchestrator" disallowConcurrentExecution="true">
@@ -36,125 +22,81 @@
     		</scheduling-strategy>
   		</scheduler>
 
-		<!-- Maximum 7 minutes for about 44,00 conctact updates, verification every 30 seconds -->
-		<set-variable doc:name="set untilMaxRetries" variableName="untilMaxRetries" value="#[20]" />
-		<set-variable doc:name="set untilMillisBetweenRetries" variableName="untilMillisBetweenRetries" value="#[30000]" />
+		<!-- Maximum 7 minutes -->
+		<set-variable variableName="untilMaxRetries" value="#[21]" />
+		<set-variable variableName="untilMillisBetweenRetries" value="#[20000]" />
+		<set-variable variableName="processNextView" value="#[false]" />
 		<flow-ref name="set-view-contact" />
-		<set-variable doc:name="set processNextView" variableName="processNextView" value="#[false]" />
-		<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
+		<flow-ref name="execute-orchestrator" />
 
 		<choice doc:name="process view address? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<flow-ref name="set-view-address" />
-				<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
+				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
 
 		<choice doc:name="process view email? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<flow-ref name="set-view-email" />
-				<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
+				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
 
 		<choice doc:name="process view phone? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<flow-ref name="set-view-phone" />
-				<flow-ref doc:name="execute orchestrator" name="execute-orchestrator" />
+				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
 
 	</flow>
 
-    <sub-flow name="execute-orchestrator" doc:name="execute orchestrator">
+	<flow name="scheduler-account">
+  		<scheduler doc:name="account orchestrator" disallowConcurrentExecution="true">
+    		<scheduling-strategy>
+    			<fixed-frequency frequency="20" timeUnit="MINUTES" startDelay="5"/>
+    		</scheduling-strategy>
+  		</scheduler>
+		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
 
-		<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started']" />
-		<flow-ref doc:name="execute ETL" name="endpoint-etl-view" />
+		<!-- Maximum 3 minutes -->
+		<set-variable variableName="untilMaxRetries" value="#[12]" />
+		<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+		<set-variable variableName="processNextView" value="#[false]" />
+		<flow-ref name="set-view-contact" />
+		<flow-ref name="execute-orchestrator" />
 
-		<!-- Verify if the  ETL started successfully? -->
-		<choice doc:name="service started ?" >
-			<when expression='#[ payload.status == 200 ]'>
-
-				<!-- The ETL started successfully, now check the status of the ETL job -->
-				<try doc:name="verify job status">
-
-					<until-successful doc:name="until sucess" maxRetries="#[vars.untilMaxRetries]" millisBetweenRetries="#[vars.untilMillisBetweenRetries]">
-						<ee:transform doc:name="set view to process" >
-							<ee:message>
-								<ee:set-attributes><![CDATA[%dw 2.0
-								output application/json
-								---
-								{
-									uriParams:{
-										view: vars.orchestrator
-									}
-								}
-								]]></ee:set-attributes>
-							</ee:message>
-						</ee:transform>
-						<flow-ref doc:name="call contact status" name="endpoint-etl-status" />
-
-						<!-- <logger level="INFO" category="app" message="#[output application/json - payload]" /> -->
-						
-						<choice doc:name="service still processing?" >
-							<when expression='#[ payload.message == "${response.service-finished}" ]'>
-
-								<choice doc:name="etl success?" >
-									<when expression='#[ payload.watermark.apiResponse.status == 200 ]'>
-										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Process finished successfully']" />
-									</when>
-									<otherwise>
-										<!-- Verify if a notification is needed -->
-										<choice doc:name="send notification ?" >
-
-											<!-- Missing primary keys are permited but only 1 retry-->
-											<when expression='#[ (write(payload.watermark.apiResponse, "application/json")) contains( "Foreign key external") ]'>
-
-												<!-- Verify the number of retries -->
-												<choice doc:name="more than 1 retry?" >
-													<when expression='#[ payload.watermark.retries > 1 ]'>
-														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. More than one retry, a notification will be sent']" />
-														<set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.multiple-retries}" />
-														<flow-ref doc:name="call contact status" name="notify-orchestrator" />
-													</when>
-													<otherwise>
-														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Missing foreing keys, with one retry this condition is accepted']" />
-													</otherwise>
-												</choice> 	
-											</when>
-
-											<otherwise>
-												<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Unexpected error, a notification will be sent']" />
-												<set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.unexpected-error}" />
-												<flow-ref doc:name="call contact status" name="notify-orchestrator" />
-											</otherwise>
-										</choice>	
-
-									</otherwise>
-								</choice>	
-							</when>
-							<otherwise>
-								<logger doc:name="attempt" level="INFO" 
-									message="#[output application/java --- 'Orchestrator ' ++ vars.orchestrator ++ '. Still processing, view: ' ++ vars.view ++ ', batch: ' ++ (payload.etlStatus.currentBatchMetadata.batchNumber as String) ++ ', expected: ' ++ (payload.etlStatus.currentBatchMetadata.expectedRecords as String) ++ ', offset: ' ++ (payload.etlStatus.currentBatchMetadata.offset as String)]"/>
-								<raise-error doc:name="Raise error" type="MULE:CONNECTIVITY" description="The ETL is still processing"/>
-							</otherwise>
-						</choice>
-					</until-successful>
-					<error-handler>
-						<on-error-continue enableNotifications="true" logException="false" />
-					</error-handler>
-				</try>
-				<set-variable doc:name="set processNextView" variableName="processNextView" value="#[true]" />
-				<!-- <logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Next steps are going to be implemented......']" /> -->
-
+		<choice doc:name="process view account ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 90 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[90]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[60000]" />
+				<flow-ref name="set-view-account" />
+				<flow-ref name="execute-orchestrator" />
 			</when>
-			<otherwise>
-				<!-- ETL not started, send notification -->
-				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Orchestrator not started, a notification will be sent']" />
-		        <set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.not-started}" />
-				<flow-ref doc:name="call contact status" name="notify-orchestrator" />
-			</otherwise>
 		</choice>
 
-    </sub-flow>
+		<choice doc:name="process view accountudf ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 3 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[12]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+				<flow-ref name="set-view-accountudf" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view agencyregion ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 3 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[12]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+				<flow-ref name="set-view-agencyregion" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+	</flow>
+
 </mule>

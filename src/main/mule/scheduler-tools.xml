@@ -69,4 +69,97 @@
 		</ee:transform>
     </sub-flow>
 
+
+
+    <sub-flow name="execute-orchestrator" doc:name="execute orchestrator">
+
+		<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Started']" />
+		<flow-ref doc:name="execute ETL" name="endpoint-etl-view" />
+
+		<!-- Verify if the  ETL started successfully? -->
+		<choice doc:name="service started ?" >
+			<when expression='#[ payload.status == 200 ]'>
+
+				<!-- The ETL started successfully, now check the status of the ETL job -->
+				<try doc:name="verify job status">
+
+					<until-successful doc:name="until sucess" maxRetries="#[vars.untilMaxRetries]" millisBetweenRetries="#[vars.untilMillisBetweenRetries]">
+						<ee:transform doc:name="set view to process" >
+							<ee:message>
+								<ee:set-attributes><![CDATA[%dw 2.0
+								output application/json
+								---
+								{
+									uriParams:{
+										view: vars.orchestrator
+									}
+								}
+								]]></ee:set-attributes>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="call contact status" name="endpoint-etl-status" />
+
+						<!-- <logger level="INFO" category="app" message="#[output application/json - payload]" /> -->
+						
+						<choice doc:name="service still processing?" >
+							<when expression='#[ payload.message == "${response.service-finished}" ]'>
+
+								<choice doc:name="etl success?" >
+									<when expression='#[ payload.watermark.apiResponse.status == 200 ]'>
+										<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Process finished successfully']" />
+									</when>
+									<otherwise>
+										<!-- Verify if a notification is needed -->
+										<choice doc:name="send notification ?" >
+
+											<!-- Missing primary keys are permited but only 1 retry-->
+											<when expression='#[ (write(payload.watermark.apiResponse, "application/json")) contains( "Foreign key external") ]'>
+
+												<!-- Verify the number of retries -->
+												<choice doc:name="more than 1 retry?" >
+													<when expression='#[ payload.watermark.retries > 1 ]'>
+														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. More than one retry, a notification will be sent']" />
+														<set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.multiple-retries}" />
+														<flow-ref doc:name="call contact status" name="notify-orchestrator" />
+													</when>
+													<otherwise>
+														<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Missing foreing keys, with one retry this condition is accepted']" />
+													</otherwise>
+												</choice> 	
+											</when>
+
+											<otherwise>
+												<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Unexpected error, a notification will be sent']" />
+												<set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.unexpected-error}" />
+												<flow-ref doc:name="call contact status" name="notify-orchestrator" />
+											</otherwise>
+										</choice>	
+
+									</otherwise>
+								</choice>	
+							</when>
+							<otherwise>
+								<logger doc:name="attempt" level="INFO" 
+									message="#[output application/java --- 'Orchestrator ' ++ vars.orchestrator ++ '. Still processing, view: ' ++ vars.view ++ ', batch: ' ++ (payload.etlStatus.currentBatchMetadata.batchNumber as String) ++ ', expected: ' ++ (payload.etlStatus.currentBatchMetadata.expectedRecords as String) ++ ', offset: ' ++ (payload.etlStatus.currentBatchMetadata.offset as String)]"/>
+								<raise-error doc:name="Raise error" type="MULE:CONNECTIVITY" description="The ETL is still processing"/>
+							</otherwise>
+						</choice>
+					</until-successful>
+					<error-handler>
+						<on-error-continue enableNotifications="true" logException="false" />
+					</error-handler>
+				</try>
+				<set-variable doc:name="set processNextView" variableName="processNextView" value="#[true]" />
+				<!-- <logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Next steps are going to be implemented......']" /> -->
+
+			</when>
+			<otherwise>
+				<!-- ETL not started, send notification -->
+				<logger level="INFO" category="app" message="#['Orchestrator ' ++ vars.orchestrator ++ '. Orchestrator not started, a notification will be sent']" />
+		        <set-variable doc:name="set orchestratorMessage" variableName="orchestratorMessage" value="${notification.orchestrator.not-started}" />
+				<flow-ref doc:name="call contact status" name="notify-orchestrator" />
+			</otherwise>
+		</choice>
+
+    </sub-flow>
 </mule>
