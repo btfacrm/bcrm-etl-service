@@ -17,8 +17,6 @@
 		<!-- Get validFrom Watermark -->
 		<flow-ref name="query-watermark-validfrom" doc:name="get watermark data"/>
 
-		<set-variable doc:name="set validFrom" variableName="validFrom" value= "#[vars.validFrom >> 'US/Mountain']" />
-
 		<!-- Get the expected the number of records to process for all batches, triggered only in first batch  -->
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
