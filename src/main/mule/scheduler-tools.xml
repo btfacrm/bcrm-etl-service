@@ -97,7 +97,7 @@
 								]]></ee:set-attributes>
 							</ee:message>
 						</ee:transform>
-						<flow-ref doc:name="call contact status" name="endpoint-etl-status" />
+						<flow-ref name="endpoint-etl-status" />
 
 						<!-- <logger level="INFO" category="app" message="#[output application/json - payload]" /> -->
 						

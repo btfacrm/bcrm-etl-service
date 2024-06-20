@@ -18,7 +18,7 @@
 		
   		<scheduler doc:name="contact orchestrator" disallowConcurrentExecution="true">
     		<scheduling-strategy>
-    			<fixed-frequency frequency="10" timeUnit="MINUTES" startDelay="1"/>
+    			<fixed-frequency frequency="25" timeUnit="MINUTES" startDelay="1"/>
     		</scheduling-strategy>
   		</scheduler>
 
@@ -55,7 +55,7 @@
 	<flow name="scheduler-account">
   		<scheduler doc:name="account orchestrator" disallowConcurrentExecution="true">
     		<scheduling-strategy>
-    			<fixed-frequency frequency="20" timeUnit="MINUTES" startDelay="5"/>
+    			<fixed-frequency frequency="30" timeUnit="MINUTES" startDelay="6"/>
     		</scheduling-strategy>
   		</scheduler>
 		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
@@ -93,6 +93,38 @@
 				<set-variable variableName="untilMaxRetries" value="#[12]" />
 				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
 				<flow-ref name="set-view-agencyregion" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<!-- Reprocess Contact and Account -->
+
+		<choice doc:name="process view account ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 3 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[12]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+				<flow-ref name="set-view-contact" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view account ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 3 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[12]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+				<flow-ref name="set-view-account" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view balance ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 90 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[90]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[60000]" />
+				<flow-ref name="set-view-balance" />
 				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
