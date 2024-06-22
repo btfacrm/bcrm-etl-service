@@ -14,9 +14,9 @@
 		http://www.mulesoft.org/schema/mule/os 			http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 		http://www.mulesoft.org/schema/mule/cloudhub 	http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 
-	<flow name="scheduler-contact">
+	<flow name="orchestrator-contact">
 		
-  		<scheduler doc:name="contact orchestrator" disallowConcurrentExecution="true">
+  		<scheduler disallowConcurrentExecution="true">
     		<scheduling-strategy>
     			<fixed-frequency frequency="25" timeUnit="MINUTES" startDelay="1"/>
     		</scheduling-strategy>
@@ -52,13 +52,12 @@
 
 	</flow>
 
-	<flow name="scheduler-account">
-  		<scheduler doc:name="account orchestrator" disallowConcurrentExecution="true">
+	<flow name="orchestrator-account">
+  		<scheduler disallowConcurrentExecution="true">
     		<scheduling-strategy>
     			<fixed-frequency frequency="30" timeUnit="MINUTES" startDelay="6"/>
     		</scheduling-strategy>
   		</scheduler>
-		<logger level="INFO" category="app" message="#['Account orchestrator: The service was invoked for not implemented yet']" />
 
 		<!-- Maximum 3 minutes -->
 		<set-variable variableName="untilMaxRetries" value="#[12]" />

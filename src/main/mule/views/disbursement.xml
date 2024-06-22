@@ -21,11 +21,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(DISTINCT CustomerAccountNumber) total from VCrm_Disbursement WHERE EffectiveDate >= :validFrom" ]' />
+					value='#["SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(DISTINCT CustomerAccountNumber) total from VCrm_Disbursement WHERE EffectiveDate between :start and :end' ]" />
+					value="#['SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -49,8 +49,8 @@
 							"   RTRIM(TaxCode) as TaxCode, " ++
 							"   RTRIM(DisbursementText) as DisbursementText,  " ++
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
-							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') AS SettleDate, " ++
-							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fff-06:00') AS EffectiveDate " ++
+							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
+							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
@@ -108,6 +108,7 @@
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
 				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
+				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>

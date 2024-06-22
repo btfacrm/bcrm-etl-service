@@ -21,7 +21,7 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					  value='#["SELECT count(*) total from VCrm_AccountMaster_UDF WHERE ValidFrom >= :validFrom" ]' />
+					value='#["SELECT count(*) total from VCrm_AccountMaster_UDF WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
