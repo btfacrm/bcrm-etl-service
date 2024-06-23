@@ -96,9 +96,9 @@
 			</when>
 		</choice>
 
-		<!-- Reprocess Contact and Account -->
+		<!-- Reprocess Contact and Account for balance -->
 
-		<choice doc:name="process view account ? " >
+		<choice doc:name="process view contact ? " >
 			<when expression='#[ vars.processNextView == true ]'>
 				<!-- Maximum 3 minutes -->
 				<set-variable variableName="untilMaxRetries" value="#[12]" />
@@ -124,6 +124,38 @@
 				<set-variable variableName="untilMaxRetries" value="#[90]" />
 				<set-variable variableName="untilMillisBetweenRetries" value="#[60000]" />
 				<flow-ref name="set-view-balance" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<!-- Reprocess Contact and Account for disbursement -->
+
+		<choice doc:name="process view contact ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 3 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[12]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+				<flow-ref name="set-view-contact" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view account ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 3 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[12]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[15000]" />
+				<flow-ref name="set-view-account" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
+
+		<choice doc:name="process view balance ? " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<!-- Maximum 90 minutes -->
+				<set-variable variableName="untilMaxRetries" value="#[90]" />
+				<set-variable variableName="untilMillisBetweenRetries" value="#[60000]" />
+				<flow-ref name="set-view-disbursement" />
 				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
