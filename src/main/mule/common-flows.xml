@@ -137,7 +137,7 @@
 
         <choice doc:name="determine how to route the flow" >
             <when expression='#[vars.recordsProcessed == vars.maxRecords and (vars.httpStatus as Number) == 200 and isEmpty(vars.customWatermarkStart)]'>
-				<logger level="INFO" category="app" message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', create message for new batch']" />
+				<logger level="INFO" category="app" message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', finished current batch and create message for new one']" />
 				<vm:publish queueName="#[vars.view]" doc:name="Publish" config-ref="VM_Config" sendCorrelationId="ALWAYS">
 					<vm:content ><![CDATA[#[%dw 2.0
 						output application/json
@@ -163,7 +163,7 @@
 				</vm:publish>				
             </when>
             <otherwise>
-				<!-- <logger level="INFO" category="app" message="#[output application/java - 'ETL: ' ++ vars.view ++ ', finished']" /> -->
+				<!-- <logger level="INFO" category="app" message="#[output application/java - 'ETL: ' ++ vars.view ++ ', finished all processing']" /> -->
 				<ee:transform doc:name="build the service response message">
 					<ee:message>
 					</ee:message>
@@ -257,7 +257,7 @@
 			</otherwise>
 		</choice>
 		<logger level="INFO" category="app" 
-			message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', batch: ' ++ vars.batchNumber ++ ', expected: ' ++ vars.expectedRecords ++ ', offset:' ++ vars.offset]" />
+			message="#[output application/java --- 'ETL: ' ++ vars.view ++ ', start batch: ' ++ vars.batchNumber ++ ', expected: ' ++ vars.expectedRecords ++ ', offset:' ++ vars.offset]" />
 
 		<choice doc:name="create API payload?" >
             <when expression='#[ vars.view == "contact" ]'>
