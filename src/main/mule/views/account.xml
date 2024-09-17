@@ -43,7 +43,7 @@
 							---
 							" SELECT " ++
 							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
-							"   OwnerContactID, " ++
+							"   OwnerContactID, CustomerShortName, " ++
 							"   AccountTierLevelNum, AccountTierLevelDesc, " ++
 							"   RTRIM(FreezeCode) as FreezeCode, " ++
 							"   RTRIM(FreezeDesc) as FreezeDesc, " ++
@@ -98,6 +98,7 @@
 							payload map (item, value) ->{
 								account: 			  item.CustomerAccountNumber,
 								contactId: 			  item.OwnerContactID as String,
+								CustomerShortName     item.CustomerShortName,
 								(tierLevelCode: 	  item.AccountTierLevelNum as String) if (!isEmpty(item.AccountTierLevelNum)),
 								(tierLevelDescription: trim(item.AccountTierLevelDesc replace "\"" with "'")) if (!isEmpty(item.AccountTierLevelDesc)),
 								(freezeCode: 		  trim(item.FreezeCode)) if (!isEmpty(item.FreezeCode)),
