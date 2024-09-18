@@ -37,7 +37,7 @@
         </db:select>
 
 		<set-variable doc:name="set recordsProcessed" variableName="recordsProcessed" value='#[if (!isEmpty(payload)) sizeOf(payload) else 0]'  />
-		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[(now()- 10)as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
+		<set-variable doc:name="set lastExecution" variableName="lastExecution" value='#[now() as String {format: "yyyy/MM/dd HH:mm:ss"}]'  />
 		<!-- <logger doc:name="num records" level="INFO" category="app" message="#['Records from watermark: ' ++ (vars.recordsProcessed as String) ]"/> -->
 	</sub-flow>
 
