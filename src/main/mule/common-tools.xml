@@ -20,7 +20,7 @@
 			<db:input-parameters ><![CDATA[#[{ 
 				lastErrorResponse: vars.lastErrorResponse,
 				lastErrorDate: now() as String {format: "yyyy-MM-dd HH:mm:ss:SSS"},
-				lastExecution: vars.lastExecution as String {format: "yyyy-MM-dd HH:mm:ss:SSS"},
+				lastExecution: (vars.lastExecution - 5) as String {format: "yyyy-MM-dd HH:mm:ss:SSS"},
 				apiResponse: write(vars.batchResponse, "application/json") 
             }]]]></db:input-parameters>
 		</db:update>
