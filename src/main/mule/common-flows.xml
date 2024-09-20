@@ -72,7 +72,7 @@
 							"   ApiResponse = :apiResponse, " ++
 							"   LastErrorDate = :lastErrorDate, " ++
 							"   LastErrorResponse = :lastErrorResponse, " ++
-							"   LastExecution = :lastExecution, " ++
+							"   LastExecution = :lastExecution - 5, " ++
 							"   Retries = Retries + 1 " ++
 							" WHERE ViewName = '" ++ vars.view ++ "'"
 						]]]>
