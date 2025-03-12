@@ -21,11 +21,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from Vcrm_AccountMaster WHERE ValidFrom >= :validFrom" ]' />
+					value='#["SELECT count(*) total from Vcrm_PaymentsMethod WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(*) total from Vcrm_AccountMaster WHERE ValidFrom between :start and :end' ]" />
+					value="#['SELECT count(*) total from Vcrm_PaymentsMethod WHERE ValidFrom between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -42,32 +42,23 @@
 							output application/json skipNullOn="everywhere"
 							---
 							" SELECT " ++
-							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
-							"   OwnerContactID, CustomerShortName, " ++
-							"   AccountTierLevelNum, AccountTierLevelDesc, " ++
-							"   RTRIM(FreezeCode) as FreezeCode, " ++
-							"   RTRIM(FreezeDesc) as FreezeDesc, " ++
-							"   AccountTypeCode, AccountTypeDescription, " ++
-							"   AccountCategoryCode, AccountCategoryDescription, " ++
-							"   AdminOfficerContactID, AdministratorName, " ++
-							"   ActiveFlag, ClosedFlag, " ++
-							"   RTRIM(CustomerDescriptionLine1) as CustomerDescriptionLine1, " ++
-							"   RTRIM(CustomerDescriptionLine2) as CustomerDescriptionLine2, " ++
-							"   RTRIM(CustomerDescriptionLine3) as CustomerDescriptionLine3, " ++
-							"   RTRIM(CustomerDescriptionLine4) as CustomerDescriptionLine4, " ++
-							"   StatementVsValidFrom_difference, " ++
-							"   FORMAT(DateOpened, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS DateOpened, " ++
-							"   FORMAT(ClosedDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ClosedDate, " ++
-							"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime, " ++
+							"   UPPER(RTRIM(ID)) as ID, " ++
+							"   ContactID, DefaultFlag, " ++
+							"   PaymentType, ReceivingBankName, " ++
+							"   ABANumbercode, " ++
+							"   CreditAcctName, " ++
+							"   CreditAccNumber, AccountType, " ++
+							"   ACHAdviceMethod, DebitCardFlag, " ++
+							"   CombineCheckFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-							" FROM Vcrm_AccountMaster " ++
+							" FROM Vcrm_PaymentsMethod " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
 								else 
 									" ValidFrom between :start and :end "
 							) ++
-							" ORDER BY ValidFrom, CustomerAccountNumber " ++
+							" ORDER BY ValidFrom, ID " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
@@ -97,28 +88,18 @@
 							output application/json
 							---
 							payload map (item, value) ->{
-								account: 			  item.CustomerAccountNumber,
+								ID: 			  item.ID,
 								contactId: 			  item.OwnerContactID as String,
 								
-								(tierLevelCode: 	  item.AccountTierLevelNum as String) if (!isEmpty(item.AccountTierLevelNum)),
-								(tierLevelDescription: trim(item.AccountTierLevelDesc replace "\"" with "'")) if (!isEmpty(item.AccountTierLevelDesc)),
-								(freezeCode: 		  trim(item.FreezeCode)) if (!isEmpty(item.FreezeCode)),
-								(freezeDescription:   trim(item.FreezeDesc replace "\"" with "'")) if (!isEmpty(item.FreezeDesc)),
-								typeCode: 			  trim(item.AccountTypeCode),
-								typeDescription: 	  trim(item.AccountTypeDescription replace "\"" with "'"),
-								categoryCode: 		  trim(item.AccountCategoryCode),
-								categoryDescription:  trim(item.AccountCategoryDescription replace "\"" with "'"),
-								adminOfficerId: 	  trim(item.AdminOfficerContactID) as String,
-								adminOfficerName: 	  trim(item.AdministratorName replace "\"" with "'"),
-								activeFlag: 		  if (item.ActiveFlag != 0) true else false,
-								(openedDate: 		  item.DateOpened) if (!isEmpty(item.DateOpened)),
-								(closedDate: 		  item.ClosedDate) if (!isEmpty(item.ClosedDate)),
-								closedFlag: 		  if (item.ClosedFlag != 0) true else false,
-								(line1: 			  trim(item.CustomerDescriptionLine1 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine1)),
-								(line2: 			  trim(item.CustomerDescriptionLine2 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine2)),
-								(line3: 			  trim(item.CustomerDescriptionLine3 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine3)),
-								(line4: 			  trim(item.CustomerDescriptionLine4 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine4)),
-								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime)),
+								(ContactID: 	      item.ContactID as String),
+								(PaymentType: 		  item.PaymentType as String,
+								(ReceivingBankName: 	item.ReceivingBankName),
+								(ABANumbercode:   trim(item.FreezeDesc replace "\"" with "'")) if (!isEmpty(item.FreezeDesc)),
+								CreditAcctName: 			  trim(item.AccountTypeCode),
+								CreditAccNumber: 	  trim(item.AccountTypeDescription replace "\"" with "'"),
+								AccountType: 		  trim(item.AccountCategoryCode),
+								DebitCardFlag:  trim(item.AccountCategoryDescription replace "\"" with "'"),
+								CombineCheckFlag: 	  trim(item.AdminOfficerContactID) as String,
 								date: 				  item.ValidFrom
 							}
 							]]>
