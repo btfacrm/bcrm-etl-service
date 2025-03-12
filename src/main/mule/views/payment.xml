@@ -10,8 +10,8 @@
 		http://www.mulesoft.org/schema/mule/core 	http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/vm		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	
-	<flow name="queue-account">
-		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="account" timeout="60" timeoutUnit="MINUTES"/>
+	<flow name="queue-payment">
+		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="payment" timeout="60" timeoutUnit="MINUTES"/>
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
 
 		<!-- Get validFrom Watermark -->
