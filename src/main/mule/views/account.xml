@@ -61,7 +61,7 @@
 							"   FORMAT(StatementDateTime, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS StatementDateTime, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM Vcrm_AccountMaster " ++
-							" WHERE " ++ (
+							" WHERE DateOpened IS NOT NULL AND " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
 								else 
