@@ -91,9 +91,15 @@
 								ID: 			  		item.ID,
 								contactId: 			  	item.ContactID as String,
 								DefaultFlag: 	      	item.DefaultFlag,
+<<<<<<< Updated upstream
 								(PaymentType: 		  	item.PaymentType as String,
 								(ReceivingBankName: 	item.ReceivingBankName),
 								(ABANumbercode:   		item.ABANumbercode,
+=======
+								(PaymentType: 		  	item.PaymentType as String),
+								(ReceivingBankName: 	item.ReceivingBankName),
+								(ABANumbercode:   		item.ABANumbercode),
+>>>>>>> Stashed changes
 								CreditAcctName: 	  	item.CreditAcctName,
 								CreditAccNumber: 	  	item.CreditAccNumber,
 								AccountType: 		  	item.AccountType,
