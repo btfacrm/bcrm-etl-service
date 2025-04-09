@@ -11,11 +11,7 @@
 
 	<groupId>176302a0-a94d-44e9-a517-9e6dc9548d0d</groupId>
 	<artifactId>bcrm-etl-service-asset</artifactId>
-<<<<<<< Updated upstream
-	<version>2.1.105</version>
-=======
 	<version>2.1.106</version>
->>>>>>> Stashed changes
 	<packaging>mule-application</packaging>
 	<name>bcrm-etl-service</name>
 	<description>BCRM ETL process for SSOT</description>
