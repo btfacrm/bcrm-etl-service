@@ -21,11 +21,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from VCrm_PaymentMethod WHERE ValidFrom >= :validFrom" ]' />
+					value='#["SELECT count(*) total from Vcrm_PaymentMethod WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(*) total from VCrm_PaymentMethod WHERE ValidFrom between :start and :end' ]" />
+					value="#['SELECT count(*) total from Vcrm_PaymentMethod WHERE ValidFrom between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -51,7 +51,7 @@
 							"   ACHAdviceMethod, DebitCardFlag, " ++
 							"   CombineCheckFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-							" FROM VCrm_PaymentMethod " ++
+							" FROM Vcrm_PaymentMethod " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
