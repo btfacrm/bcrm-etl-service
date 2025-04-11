@@ -21,11 +21,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from Vcrm_PaymentMethod WHERE ValidFrom >= :validFrom" ]' />
+					value='#["SELECT count(*) total from VCrm_PaymentMethod WHERE ValidFrom >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(*) total from Vcrm_PaymentMethod WHERE ValidFrom between :start and :end' ]" />
+					value="#['SELECT count(*) total from VCrm_PaymentMethod WHERE ValidFrom between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -45,13 +45,13 @@
 							"   UPPER(RTRIM(ID)) as ID, " ++
 							"   ContactID, DefaultFlag, " ++
 							"   PaymentType, ReceivingBankName, " ++
-							"   ABANumbercode, " ++
+							"   ABANumberCode, " ++
 							"   CreditAcctName, " ++
 							"   CreditAccNumber, AccountType, " ++
 							"   ACHAdviceMethod, DebitCardFlag, " ++
 							"   CombineCheckFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
-							" FROM Vcrm_PaymentMethod " ++
+							" FROM VCrm_PaymentMethod " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
 									" ValidFrom >= :validFrom "
