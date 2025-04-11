@@ -25,6 +25,7 @@
 
 		<choice doc:name="verify if view is valid" >
             <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","address", "email", "tribe"] contains vars.view ]'>
+            <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","payment","address", "email", "tribe"] contains vars.view ]'>
 
 				<os:retrieve key="#[vars.view]" objectStore="Object_store" target="etlMemoryStatus">
 					<os:default-value>#[""]</os:default-value>
