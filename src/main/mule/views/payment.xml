@@ -95,7 +95,7 @@
 								(ReceivingBankName: 	item.ReceivingBankName),
 								(ABANumbercode:   		item.ABANumbercode),
 								CreditAcctName: 	  	item.CreditAcctName,
-								CreditAccNumber: 	  	item.CreditAcctNumber,
+								CreditAcctNumber: 	  	item.CreditAcctNumber,
 								AccountType: 		  	item.AccountType,
 								DebitCardFlag:  		item.DebitCardFlag,
 								CombineCheckFlag: 	  	item.CombineCheckFlag,
