@@ -49,7 +49,7 @@
 							"   CreditAcctName, " ++
 							"   CreditAccNumber, AccountType, " ++
 							"   ACHAdviceMethod, DebitCardFlag, " ++
-							"   CombineCheckFlag, " ++
+							"   CombineChecksFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_PaymentMethod " ++
 							" WHERE " ++ (
