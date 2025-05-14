@@ -42,3 +42,4 @@ service:
     agencyregion: "/api/agencyregion"
     balance: "/api/balance"
     disbursement: "/api/disbursement"
+    payment: "/api/payment"
