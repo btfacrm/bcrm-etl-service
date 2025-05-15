@@ -85,20 +85,22 @@
 					<ee:message >
 					<!-- CustomerShortName:    item.CustomerShortName, -->
 						<ee:set-payload ><![CDATA[%dw 2.0
-							output application/json
+							output application/json skipNullOn="everywhere"
 							---
 							payload map (item, value) ->{
 								ID: 			  		item.ID,
 								contactId: 			  	item.ContactID as String,
-								DefaultFlag: 	      	item.DefaultFlag,
+								DefaultFlag: 	      		!isEmpty(item.DefaultFlag) and item.DefaultFlag != 0,
 								(PaymentType: 		  	item.PaymentType as String),
-								(ReceivingBankName: 	item.ReceivingBankName),
+								(ReceivingBankName: 		item.ReceivingBankName),
 								(ABANumbercode:   		item.ABANumbercode),
 								CreditAcctName: 	  	item.CreditAcctName,
 								CreditAcctNumber: 	  	item.CreditAcctNumber,
 								AccountType: 		  	item.AccountType,
-								DebitCardFlag:  		item.DebitCardFlag,
-								CombineCheckFlag: 	  	item.CombineCheckFlag,
+								ACHAdviceMethod: 		  	item.ACHAdviceMethod,
+								DebitCardFlag:  		!isEmpty(item.DebitCardFlag) and item.DebitCardFlag != 0,
+								CombineCheckFlag: 	  	!isEmpty(item.CombineCheckFlag) and item.CombineCheckFlag != 0,
+								ActiveFlag: 	  		!isEmpty(item.ActiveFlag) and item.ActiveFlag != 0,
 								date: 				  	item.ValidFrom
 							}
 							]]>
@@ -107,7 +109,7 @@
 				</ee:transform>
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
-				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  /> !isEmpty(item.SSNFlag) and item.SSNFlag != 0
 				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].date]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
