@@ -50,6 +50,7 @@
 							"   CreditAcctNumber, AccountType, " ++
 							"   ACHAdviceMethod, DebitCardFlag, " ++
 							"   CombineChecksFlag, " ++
+							"   ActiveFlag, " ++
 							"   FORMAT(ValidFrom, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS ValidFrom " ++
 							" FROM VCrm_PaymentMethods " ++
 							" WHERE " ++ (
@@ -99,7 +100,7 @@
 								AccountType: 		  	item.AccountType,
 								ACHAdviceMethod: 		  	item.ACHAdviceMethod,
 								DebitCardFlag:  		if (item.DebitCardFlag != 0) true else false,
-								CombineCheckFlag: 	  	if (item.CombineCheckFlag != 0) true else false,
+								CombineCheckFlag: 	  	if (item.CombineChecksFlag != 0) true else false,
 								ActiveFlag: 	  		if (item.ActiveFlag != 0) true else false,
 								date: 				  	item.ValidFrom
 							}
