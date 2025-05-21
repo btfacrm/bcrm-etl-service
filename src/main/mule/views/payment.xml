@@ -91,17 +91,17 @@
 							payload map (item, value) ->{
 								ID: 			  		item.ID as String,
 								contactId: 			  	item.ContactID as String,
-								DefaultFlag: 	      		if (item.DefaultFlag != 0) true else false,
+								DefaultFlag: 	      	if (item.DefaultFlag != -1) false else true,
 								(PaymentType: 		  	item.PaymentType),
-								(ReceivingBankName: 		item.ReceivingBankName),
+								(ReceivingBankName: 	item.ReceivingBankName),
 								(ABANumbercode:   		item.ABANumbercode ),
 								CreditAcctName: 	  	item.CreditAcctName,
 								CreditAcctNumber: 	  	item.CreditAcctNumber,
 								AccountType: 		  	item.AccountType,
-								ACHAdviceMethod: 		  	item.ACHAdviceMethod,
-								DebitCardFlag:  		if (item.DebitCardFlag != 0) true else false,
-								CombineCheckFlag: 	  	if (item.CombineChecksFlag != 0) true else false,
-								ActiveFlag: 	  		if (item.ActiveFlag != 0) true else false,
+								ACHAdviceMethod: 		item.ACHAdviceMethod,
+								DebitCardFlag:  		if (item.DebitCardFlag != -1) false else true,
+								CombineCheckFlag: 	  	if (item.CombineChecksFlag != -1) false else true,
+								ActiveFlag: 	  		if (item.ActiveFlag != -1) false else true,
 								date: 				  	item.ValidFrom
 							}
 							]]>
