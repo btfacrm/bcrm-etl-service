@@ -21,11 +21,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate >= :validFrom" ]' />
+					value='#["SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate_UTC >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate between :start and :end' ]" />
+					value="#['SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate_UTC between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -35,6 +35,7 @@
             <when expression='#[ vars.expectedRecords > 0 ]'>
 			
 				<!-- Create query for view -->
+				<!-- Updated 6/4/2025  changed SettleDate to SettleDate8 and EffectiveDate to EffectiveDate_UTC-->
 				<flow-ref name="save-status-step4" doc:name="save batch status 4"/>
 				<ee:transform doc:name="sql for view" >
 					<ee:variables >
@@ -49,16 +50,16 @@
 							"   RTRIM(TaxCode) as TaxCode, " ++
 							"   RTRIM(DisbursementText) as DisbursementText,  " ++
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
-							"   FORMAT(SettleDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
-							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
+							"   FORMAT(SettleDate8, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
+							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" EffectiveDate >= :validFrom "
+									" EffectiveDate_UTC >= :validFrom "
 								else
-									" EffectiveDate between :start and :end "
+									" EffectiveDate_UTC between :start and :end "
 							) ++
-							" ORDER BY EffectiveDate, CustomerAccountNumber " ++
+							" ORDER BY EffectiveDate_UTC, CustomerAccountNumber " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>

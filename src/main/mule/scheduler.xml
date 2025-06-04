@@ -49,13 +49,6 @@
 				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
-		
-		<choice doc:name="process view Payment " >
-			<when expression='#[ vars.processNextView == true ]'>
-				<flow-ref name="set-view-payment" />
-				<flow-ref name="execute-orchestrator" />
-			</when>
-		</choice>
 
 	</flow>
 

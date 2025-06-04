@@ -111,7 +111,6 @@
 			<vm:queue queueName="disbursement" />
 			<vm:queue queueName="agencyregion" />
 			<vm:queue queueName="phone" />
-			<vm:queue queueName="payment" />
 			<vm:queue queueName="address" />
 			<vm:queue queueName="email" />
 			<vm:queue queueName="tribe" />
