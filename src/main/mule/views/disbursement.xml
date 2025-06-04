@@ -55,11 +55,11 @@
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" EffectiveDate_UTC >= :validFrom "
+									" EffectiveDate >= :validFrom "
 								else
-									" EffectiveDate_UTC between :start and :end "
+									" EffectiveDate between :start and :end "
 							) ++
-							" ORDER BY EffectiveDate_UTC, CustomerAccountNumber " ++
+							" ORDER BY EffectiveDate, CustomerAccountNumber " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
