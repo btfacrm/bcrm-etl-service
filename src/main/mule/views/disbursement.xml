@@ -21,11 +21,11 @@
 		<choice doc:name="custom watermark dates?" >
             <when expression='#[ isEmpty(vars.customWatermarkStart) ]'>
 				<set-variable doc:name="query expected records" variableName="query" 
-					value='#["SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate_UTC >= :validFrom" ]' />
+					value='#["SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate >= :validFrom" ]' />
 			</when>
 			<otherwise>
 				<set-variable doc:name="query expected records with custom watermark" variableName="query" 
-					value="#['SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate_UTC between :start and :end' ]" />
+					value="#['SELECT count(*) total from VCrm_Disbursement WHERE EffectiveDate between :start and :end' ]" />
 			</otherwise>
 		</choice>
 
@@ -51,7 +51,7 @@
 							"   RTRIM(DisbursementText) as DisbursementText,  " ++
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
 							"   FORMAT(SettleDate8, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
-							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
+							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate_UTC " ++
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
@@ -100,7 +100,7 @@
 								incomeIndicator: 		item.PrincIncomeIndicator,
 								taxCode: 				item.TaxCode,
 								taxYear: 				item.TaxYear,
-								date: 					item.EffectiveDate
+								date: 					item.EffectiveDate_UTC
 							}
 							]]>
 						</ee:set-payload>
