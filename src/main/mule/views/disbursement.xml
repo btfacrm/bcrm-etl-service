@@ -51,7 +51,8 @@
 							"   RTRIM(DisbursementText) as DisbursementText,  " ++
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
 							"   FORMAT(SettleDate8, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
-							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate_UTC " ++
+							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate_UTC, " ++
+							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
@@ -100,7 +101,8 @@
 								incomeIndicator: 		item.PrincIncomeIndicator,
 								taxCode: 				item.TaxCode,
 								taxYear: 				item.TaxYear,
-								date: 					item.EffectiveDate_UTC
+								date: 					item.EffectiveDate_UTC,
+								watermarkdate: 					item.EffectiveDate
 							}
 							]]>
 						</ee:set-payload>
@@ -108,8 +110,8 @@
 				</ee:transform>
 
 				<!-- firstElementDate is needed if an error occurs, then watermark validFrom = firstElementDate -->
-				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].date]'  />
-				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].date]'  />
+				<set-variable doc:name="set firstElementDate" variableName="firstElementDate" value='#[payload[0].watermarkdate]'  />
+				<set-variable doc:name="set lastRecordDate" variableName="lastRecordDate" value='#[payload[-1].watermarkdate]'  />
 				<flow-ref name="call-api" doc:name="call api"/>
             </when>
         </choice>
