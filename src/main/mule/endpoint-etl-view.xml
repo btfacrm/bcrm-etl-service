@@ -24,7 +24,7 @@
 			message="#['Request ETL, view: ' ++ vars.view ++ ', start: ' ++ vars.customWatermarkStart ++ ', end: ' ++ vars.customWatermarkEnd ++ ', id: ' ++ vars.customId]"/>
 
 		<choice doc:name="verify if view is valid" >
-            <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","payment","address", "email", "tribe"] contains vars.view ]'>
+            <when expression='#[ ["contact","account","accountudf","balance","disbursement","agencyregion","phone","payment","deletepayment","address", "email", "tribe"] contains vars.view ]'>
 
 				<os:retrieve key="#[vars.view]" objectStore="Object_store" target="etlMemoryStatus">
 					<os:default-value>#[""]</os:default-value>

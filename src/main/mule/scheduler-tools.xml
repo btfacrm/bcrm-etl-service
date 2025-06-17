@@ -32,6 +32,11 @@
 		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="payment" />
 		<flow-ref name="set-view-for-orchestrator" />
     </sub-flow>
+    
+    <sub-flow name="set-view-deletepayment">
+		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="deletepayment" />
+		<flow-ref name="set-view-for-orchestrator" />
+    </sub-flow>
 
     <sub-flow name="set-view-account">
 		<set-variable doc:name="set orchestrator" variableName="orchestrator" value="account" />

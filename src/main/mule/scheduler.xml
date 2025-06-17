@@ -56,6 +56,13 @@
 				<flow-ref name="execute-orchestrator" />
 			</when>
 		</choice>
+		
+		<choice doc:name="process view Delete Payment " >
+			<when expression='#[ vars.processNextView == true ]'>
+				<flow-ref name="set-view-deletepayment" />
+				<flow-ref name="execute-orchestrator" />
+			</when>
+		</choice>
 
 	</flow>
 

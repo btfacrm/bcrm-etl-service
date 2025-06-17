@@ -43,3 +43,4 @@ service:
     balance: "/api/balance"
     disbursement: "/api/disbursement"
     payment: "/api/payment"
+    deletepayment: "/api/deletepayment"

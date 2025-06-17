@@ -13,6 +13,7 @@
 	xmlns:os="http://www.mulesoft.org/schema/mule/os"
 	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" 
 	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
 		http://www.mulesoft.org/schema/mule/api-gateway 
 		http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd 
 		http://www.mulesoft.org/schema/mule/validation 
@@ -112,6 +113,7 @@
 			<vm:queue queueName="agencyregion" />
 			<vm:queue queueName="phone" />
 			<vm:queue queueName="payment" />
+			<vm:queue queueName="deletepayment" />
 			<vm:queue queueName="address" />
 			<vm:queue queueName="email" />
 			<vm:queue queueName="tribe" />
