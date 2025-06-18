@@ -10,7 +10,7 @@
 		http://www.mulesoft.org/schema/mule/core 	http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/vm		http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	
-	<flow name="queue-payment">
+	<flow name="queue-deletepayment">
 		<vm:listener doc:name="Listener" config-ref="VM_Config" queueName="deletepayment" timeout="60" timeoutUnit="MINUTES"/>
 		<flow-ref name="initialize-process" doc:name="initialize process"/>
 
