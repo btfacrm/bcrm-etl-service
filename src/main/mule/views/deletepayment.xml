@@ -48,11 +48,11 @@
 							" FROM VCrm_DeletedPaymentMethods " ++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
-									" ValidFrom >= :validFrom "
+									" DateDeleted >= :validFrom "
 								else 
-									" ValidFrom between :start and :end "
+									" DateDeleted between :start and :end "
 							) ++
-							" ORDER BY ValidFrom, ID " ++
+							" ORDER BY DateDeleted, ID " ++
 							" OFFSET " ++ (vars.offset as String) ++ " ROWS " ++
 							" FETCH NEXT " ++ (vars.maxRecords as String) ++ " ROWS ONLY"
 						]]]>
