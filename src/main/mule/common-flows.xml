@@ -294,7 +294,7 @@
 				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.payment}" />
 			</when>	
 			<when expression='#[ vars.view == "deletepayment" ]'>
-				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.payment}" />
+				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="${service.path.deletepayment}" />
 			</when>	
 			<otherwise>
 				<set-variable doc:name="set view API endpoint" variableName="servicePath" value="this-path-is-not-correct" />
