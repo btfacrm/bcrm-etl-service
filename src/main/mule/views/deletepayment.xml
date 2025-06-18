@@ -83,7 +83,7 @@
 							---
 							payload map (item, value) ->{
 								ID: 			  		item.ID as String,
-								DeletedFlag: 			 item.DeletedFlag,
+								DeletedFlag: 			 if (item.DeletedFlag != 1) false else true,
 								date: 				  	item.ValidFrom
 							}
 							]]>
