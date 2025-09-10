@@ -43,7 +43,8 @@
 							---
 							" SELECT " ++
 							"   UPPER(RTRIM(CustomerAccountNumber)) as CustomerAccountNumber, " ++
-							"   OwnerContactID, CustomerShortName, " ++
+							"   OwnerContactID, CustomerShortName, PreviousAccountNumber, " ++
+							"   FORMAT (PreviousAccountNumberChangeDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS PreviousAccountNumberChangeDate, " ++
 							"   AccountTierLevelNum, AccountTierLevelDesc, " ++
 							"   RTRIM(FreezeCode) as FreezeCode, " ++
 							"   RTRIM(FreezeDesc) as FreezeDesc, " ++
@@ -92,14 +93,14 @@
 
 				<ee:transform doc:name="api payload" >
 					<ee:message >
-					<!-- CustomerShortName:    item.CustomerShortName, -->
+					
 						<ee:set-payload ><![CDATA[%dw 2.0
 							output application/json
 							---
 							payload map (item, value) ->{
 								account: 			  item.CustomerAccountNumber,
 								contactId: 			  item.OwnerContactID as String,
-								
+								CustomerShortName:    item.CustomerShortName,
 								(tierLevelCode: 	  item.AccountTierLevelNum as String) if (!isEmpty(item.AccountTierLevelNum)),
 								(tierLevelDescription: trim(item.AccountTierLevelDesc replace "\"" with "'")) if (!isEmpty(item.AccountTierLevelDesc)),
 								(freezeCode: 		  trim(item.FreezeCode)) if (!isEmpty(item.FreezeCode)),
@@ -119,6 +120,8 @@
 								(line3: 			  trim(item.CustomerDescriptionLine3 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine3)),
 								(line4: 			  trim(item.CustomerDescriptionLine4 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine4)),
 								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime)),
+								PreviousAccountNumber: item.PreviousAccountNumber,
+								PreviousAccountNumberChangeDate:   item.PreviousAccountNumberChangeDate,
 								date: 				  item.ValidFrom
 							}
 							]]>
