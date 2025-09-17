@@ -52,7 +52,11 @@
 							"   DebitCreditIndicator, Amount, SettledFlag, PrincIncomeIndicator, TaxYear, " ++
 							"   FORMAT(SettleDate8, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
 							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate_UTC, " ++
-							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate " ++
+							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate," ++
+							"   DocRefNumber, ControlLog, ReceivingBankName, ABANumber," ++
+							"	CreditAcctName, CreditAcctNumber, DocumentNumber, PaidToContactName," ++
+							"	PaidToAddressAddress1, PaidToAddressCity, PaidToAddressState, PaidToAddressZipCode" ++
+										
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
 								if (isEmpty(vars.customWatermarkStart))
@@ -102,7 +106,19 @@
 								taxCode: 				item.TaxCode,
 								taxYear: 				item.TaxYear,
 								date: 					item.EffectiveDate_UTC,
-								watermarkdate: 					item.EffectiveDate
+								watermarkdate: 			item.EffectiveDate,
+								docRefNumber:			item.DocRefNumber, 
+								controlLog:				item.ControlLog,
+								receivingBankName:		item.ReceivingBankName, 
+								abaNumber:				item.ABANumber,
+								creditAcctName:			item.CreditAcctName,
+								creditAcctNumber:		item.CreditAcctNumber,
+								documentNumber:			item.DocumentNumber,
+								paidToContactName:		item.PaidToContactName,
+								paidToAddress1:			item.PaidToAddressAddress1,
+								paidToAddressCity:		item.PaidToAddressCity,
+								paidToAddressState:		item.PaidToAddressState,
+								paidToAddressZip:		item.PaidToAddressZipCode 							
 							}
 							]]>
 						</ee:set-payload>
