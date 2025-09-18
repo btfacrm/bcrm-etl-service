@@ -107,18 +107,20 @@
 								taxYear: 				item.TaxYear,
 								date: 					item.EffectiveDate_UTC,
 								watermarkdate: 			item.EffectiveDate,
-								docRefNumber:			item.DocRefNumber, 
-								controlLog:				item.ControlLog,
-								receivingBankName:		item.ReceivingBankName, 
-								abaNumber:				item.ABANumber,
-								creditAcctName:			item.CreditAcctName,
-								creditAcctNumber:		item.CreditAcctNumber,
-								documentNumber:			item.DocumentNumber,
-								paidToContactName:		item.PaidToContactName,
-								paidToAddress1:			item.PaidToAddressAddress1,
-								paidToAddressCity:		item.PaidToAddressCity,
-								paidToAddressState:		item.PaidToAddressState,
-								paidToAddressZip:		item.PaidToAddressZipCode 							
+								docRefNumber:			if(!isEmpty(item.DocRefNumber )) item.DocRefNumber  else "#N/A",
+								controlLog:				if(!isEmpty(item.ControlLog)) item.ControlLog else "#N/A",
+								receivingBankName:		if(!isEmpty(item.ReceivingBankName )) item.ReceivingBankName  else "#N/A",
+								abaNumber:				if(!isEmpty(item.ABANumber)) item.ABANumber else "#N/A",
+								creditAcctName:			if(!isEmpty(item.CreditAcctName)) item.CreditAcctName else "#N/A",
+								creditAcctNumber:		if(!isEmpty(item.CreditAcctNumber)) item.CreditAcctNumber else "#N/A",
+								documentNumber:			if(!isEmpty(item.DocumentNumber)) item.DocumentNumber else "#N/A",
+								paidToContactName:		if(!isEmpty(item.PaidToContactName)) item.PaidToContactName else "#N/A",
+								paidToAddress1:			if(!isEmpty(item.PaidToAddressAddress1)) item.PaidToAddressAddress1 else "#N/A",
+								paidToAddressCity:		if(!isEmpty(item.PaidToAddressCity)) item.PaidToAddressCity else "#N/A",
+								paidToAddressState:		if(!isEmpty(item.PaidToAddressState)) item.PaidToAddressState else "#N/A",
+								paidToAddressZip:		if(!isEmpty(item.PaidToAddressZipCode )) item.PaidToAddressZipCode  else "#N/A"
+
+							
 							}
 							]]>
 						</ee:set-payload>
