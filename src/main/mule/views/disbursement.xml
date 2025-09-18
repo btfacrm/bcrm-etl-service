@@ -53,9 +53,18 @@
 							"   FORMAT(SettleDate8, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS SettleDate, " ++
 							"   FORMAT(EffectiveDate_UTC, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate_UTC, " ++
 							"   FORMAT(EffectiveDate, 'yyyy-MM-ddTHH:mm:ss.fffZ') AS EffectiveDate," ++
-							"   DocRefNumber, ControlLog, ReceivingBankName, ABANumber," ++
-							"	CreditAcctName, CreditAcctNumber, DocumentNumber, PaidToContactName," ++
-							"	PaidToAddressAddress1, PaidToAddressCity, PaidToAddressState, PaidToAddressZipCode" ++
+							"   RTRIM(DocRefNumber) as DocRefNumber, " ++
+							"	RTRIM(ControlLog) as ControlLog, " ++
+							"  	RTRIM(ReceivingBankName) as ReceivingBankName, " ++
+							"	RTRIM(ABANumber) as ABANumber, " ++
+							"	RTRIM(CreditAcctName) as CreditAcctName, " ++
+							"	RTRIM(CreditAcctNumber) as CreditAcctNumber, " ++
+							"	RTRIM(DocumentNumber) as DocumentNumber, " ++
+							"	RTRIM(PaidToContactName) as PaidToContactName, " ++
+							"	RTRIM(PaidToAddressAddress1) as PaidToAddressAddress1, " ++
+							"	RTRIM(PaidToAddressCity) as PaidToAddressCity, " ++
+							"	RTRIM(PaidToAddressState) as PaidToAddressState, " ++
+							"	RTRIM(PaidToAddressZipCode) as PaidToAddressZipCode" ++
 										
 							" FROM VCrm_Disbursement "++
 							" WHERE " ++ (
