@@ -107,18 +107,18 @@
 								taxYear: 				item.TaxYear,
 								date: 					item.EffectiveDate_UTC,
 								watermarkdate: 			item.EffectiveDate,
-								docRefNumber:			trim(item.DocRefNumber ))if(!isEmpty(item.DocRefNumber )),
-								controlLog:				trim(item.ControlLog))if(!isEmpty(item.ControlLog)),
-								receivingBankName:		trim(item.ReceivingBankName ))if(!isEmpty(item.ReceivingBankName )),
-								abaNumber:				trim(item.ABANumber))if(!isEmpty(item.ABANumber)),
-								creditAcctName:			trim(item.CreditAcctName))if(!isEmpty(item.CreditAcctName)),
-								creditAcctNumber:		trim(item.CreditAcctNumber))if(!isEmpty(item.CreditAcctNumber)),
-								documentNumber:			trim(item.DocumentNumber))if(!isEmpty(item.DocumentNumber)),
-								paidToContactName:		trim(item.PaidToContactName))if(!isEmpty(item.PaidToContactName)),
-								paidToAddress1:			trim(item.PaidToAddressAddress1))if(!isEmpty(item.PaidToAddressAddress1)),
-								paidToAddressCity:		trim(item.PaidToAddressCity))if(!isEmpty(item.PaidToAddressCity)),
-								paidToAddressState:		trim(item.PaidToAddressState))if(!isEmpty(item.PaidToAddressState)),
-								paidToAddressZip:		trim(item.PaidToAddressZipCode ))if(!isEmpty(item.PaidToAddressZipCode ))
+								(docRefNumber:			trim(item.DocRefNumber)) if (!isEmpty(item.DocRefNumber)),
+								(controlLog:			trim(item.ControlLog)) if (!isEmpty(item.ControlLog)),
+								(receivingBankName:		trim(item.ReceivingBankName)) if (!isEmpty(item.ReceivingBankName )),
+								(abaNumber:				trim(item.ABANumber)) if (!isEmpty(item.ABANumber)),
+								(creditAcctName:		trim(item.CreditAcctName)) if (!isEmpty(item.CreditAcctName)),
+								(creditAcctNumber:		trim(item.CreditAcctNumber)) if (!isEmpty(item.CreditAcctNumber)),
+								(documentNumber:		trim(item.DocumentNumber)) if (!isEmpty(item.DocumentNumber)),
+								(paidToContactName:		trim(item.PaidToContactName)) if (!isEmpty(item.PaidToContactName)),
+								(paidToAddress1:		trim(item.PaidToAddressAddress1)) if (!isEmpty(item.PaidToAddressAddress1)),
+								(paidToAddressCity:		trim(item.PaidToAddressCity)) if (!isEmpty(item.PaidToAddressCity)),
+								(paidToAddressState:	trim(item.PaidToAddressState)) if (!isEmpty(item.PaidToAddressState)),
+								(paidToAddressZip:		trim(item.PaidToAddressZipCode)) if (!isEmpty(item.PaidToAddressZipCode))
 
 
 							
