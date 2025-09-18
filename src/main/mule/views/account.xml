@@ -120,8 +120,8 @@
 								(line3: 			  trim(item.CustomerDescriptionLine3 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine3)),
 								(line4: 			  trim(item.CustomerDescriptionLine4 replace "\"" with "'")) if (!isEmpty(item.CustomerDescriptionLine4)),
 								(statementDate: 	  item.StatementDateTime) if (!isEmpty(item.StatementDateTime)),
-								PreviousAccountNumber: item.PreviousAccountNumber,
-								PreviousAccountNumberChangeDate:   item.PreviousAccountNumberChangeDate,
+								(PreviousAccountNumber: trim(item.PreviousAccountNumber)) if (!isEmpty(item.PreviousAccountNumber)),
+								(PreviousAccountNumberChangeDate:   trim(item.PreviousAccountNumberChangeDate)) if (!isEmpty(item.PreviousAccountNumberChangeDate)),
 								date: 				  item.ValidFrom
 							}
 							]]>
