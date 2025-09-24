@@ -58,7 +58,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			host="0.0.0.0"
 			protocol="HTTPS"
 			port="${https.port}"
-			tlsContext-ref="TLS_Context"
+			tlsContext="TLS_Context"
 			connectionIdleTimeout="3600000"/>
 	</http:listener-config>
 	
