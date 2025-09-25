@@ -57,6 +57,18 @@
 					</sharedLibraries>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupID>
+				<artifactId>maven-resources-plugin</artifact>
+				<version> 3.3.1</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>bcfks</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
