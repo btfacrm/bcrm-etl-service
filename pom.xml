@@ -35,9 +35,9 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
-				<filtering>true<filtering>
-			<resource>
-		<resources>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 			
 		<plugins>
 			<plugin>
@@ -110,6 +110,12 @@
 			<version>1.2.2</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
+		<dependency>
+    		<groupId>org.bouncycastle</groupId>
+   			<artifactId>bc-fips</artifactId>
+    		<version>2.1.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.mulesoft.connectors</groupId>
 			<artifactId>mule-cloudhub-connector</artifactId>
